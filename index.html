@@ -4,24 +4,4196 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>酒屋大战 - 网页试玩版</title>
-  <meta name="description" content="日式居酒屋风格的搞笑拼酒回合制网页游戏试玩版。">
-  <link rel="icon" type="image/png" href="./assets/icon-jiuwu-dazhan.png?v=20260621c">
-  <link rel="stylesheet" href="./styles.css?v=20260621c">
+<style>
+:root {
+  --bg-deep: #3d170f;
+  --bg-warm: #6c2d18;
+  --paper: #fffaf1;
+  --paper-dark: #f0dcc0;
+  --ink: #3f1a10;
+  --muted: #7c5a47;
+  --gold: #f4c976;
+  --gold-dark: #c58a38;
+  --red: #a92b19;
+  --red-bright: #d85621;
+  --panel-shadow: 0 20px 44px rgba(87, 33, 18, 0.14);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top, rgba(255, 248, 220, 0.82), rgba(0, 0, 0, 0) 28%),
+    linear-gradient(180deg, var(--bg-deep) 0, var(--bg-warm) 120px, #e7d0a4 120px, #f4e5c5 100%);
+}
+
+button {
+  font: inherit;
+}
+
+.page-shell {
+  position: relative;
+  min-height: 100vh;
+  padding: 36px 24px 44px;
+  overflow: hidden;
+}
+
+.paper-bg {
+  position: absolute;
+  z-index: 0;
+  top: 110px;
+  right: 12px;
+  bottom: 10px;
+  left: 12px;
+  border-radius: 28px;
+  background:
+    linear-gradient(90deg, rgba(130, 74, 45, 0.08) 0 2px, rgba(0, 0, 0, 0) 2px 25%),
+    radial-gradient(circle at 12% 10%, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 24%),
+    radial-gradient(circle at 82% 16%, rgba(255, 226, 170, 0.18), rgba(255, 226, 170, 0) 22%),
+    linear-gradient(180deg, rgba(255, 252, 245, 0.97), rgba(245, 230, 201, 0.98));
+  box-shadow:
+    inset 0 0 0 2px rgba(131, 64, 37, 0.08),
+    0 18px 48px rgba(67, 23, 10, 0.18);
+}
+
+.lantern-row {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  padding: 0 16px;
+}
+
+.lantern {
+  position: relative;
+  width: 88px;
+  height: 118px;
+  border-radius: 42px;
+  background: linear-gradient(180deg, #ffeaab, #ff7f34 42%, #c53b18);
+  box-shadow: 0 0 28px rgba(255, 176, 88, 0.55);
+  animation: float-lantern 2.6s ease-in-out infinite alternate;
+}
+
+.lantern:nth-child(2) {
+  animation-delay: 0.4s;
+}
+
+.lantern:nth-child(3) {
+  animation-delay: 0.8s;
+}
+
+.lantern:nth-child(4) {
+  animation-delay: 1.2s;
+}
+
+.lantern-string,
+.lantern-tail {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.lantern-string {
+  top: -34px;
+  width: 4px;
+  height: 34px;
+  background: rgba(255, 239, 219, 0.92);
+}
+
+.lantern-tail {
+  bottom: -22px;
+  width: 24px;
+  height: 24px;
+  border-radius: 0 0 24px 24px;
+  background: #6c1c0e;
+}
+
+#app {
+  position: relative;
+  z-index: 3;
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+.hero-banner,
+.catalog-board,
+.roster-card,
+.banner-board,
+.arena,
+.action-board,
+.result-panel,
+.log-card {
+  box-shadow: var(--panel-shadow);
+}
+
+.hero-banner {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  align-items: start;
+  padding: 28px 30px;
+  border-radius: 30px;
+  background: linear-gradient(135deg, rgba(122, 35, 21, 0.96), rgba(74, 22, 14, 0.98));
+  color: #fff4de;
+}
+
+.hero-icon {
+  width: 100%;
+  max-width: 132px;
+  border-radius: 34px;
+  border: 5px solid rgba(255, 234, 171, 0.24);
+}
+
+.hero-chip {
+  display: inline-block;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(255, 234, 171, 0.18);
+  font-size: 14px;
+  letter-spacing: 4px;
+}
+
+.hero-title {
+  margin-top: 18px;
+  font-size: clamp(36px, 7vw, 68px);
+  font-weight: 800;
+  letter-spacing: 6px;
+}
+
+.hero-subtitle {
+  margin-top: 14px;
+  color: rgba(255, 244, 222, 0.82);
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+.hero-actions,
+.battle-header-side {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.battle-header-side {
+  margin-top: 0;
+  justify-content: flex-end;
+}
+
+.sound-btn {
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(122, 35, 21, 0.18);
+  background: rgba(255, 248, 235, 0.88);
+  color: #8d3117;
+  box-shadow: 0 10px 22px rgba(122, 35, 21, 0.08);
+  cursor: pointer;
+}
+
+.sound-btn.small {
+  color: #8d3117;
+  font-weight: 700;
+}
+
+.audio-pill {
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255, 249, 239, 0.12);
+  color: rgba(255, 244, 222, 0.82);
+  font-size: 14px;
+}
+
+.rule-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.rule-pill {
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: rgba(255, 249, 239, 0.82);
+  color: #7f2f17;
+  font-size: 14px;
+}
+
+.roster {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  margin-top: 28px;
+}
+
+.roster-card,
+.catalog-board,
+.banner-board,
+.action-board,
+.result-panel,
+.log-card {
+  padding: 24px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(255, 251, 245, 0.97), rgba(244, 227, 198, 0.98));
+}
+
+.roster-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.roster-stamp {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: var(--red);
+  color: #fff6e8;
+  display: grid;
+  place-items: center;
+  font-size: 28px;
+  font-weight: 700;
+  transform: rotate(12deg);
+}
+
+.mini-stage {
+  position: relative;
+  height: 240px;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  margin: -6px -8px 12px;
+  border-radius: 26px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at center, rgba(255, 182, 120, 0.22), rgba(255, 255, 255, 0) 58%);
+}
+
+.mini-stage::before,
+.mini-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.mini-stage::after {
+  inset: auto 0 0 0;
+  height: 70px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(104, 58, 28, 0.08) 22%, rgba(104, 58, 28, 0.16));
+}
+
+.mini-stage-zhongju {
+  background:
+    radial-gradient(circle at 50% 22%, rgba(255, 242, 196, 0.34), rgba(255, 255, 255, 0) 38%),
+    linear-gradient(180deg, rgba(225, 236, 248, 0.96), rgba(209, 221, 235, 0.96) 60%, rgba(187, 160, 127, 0.95) 60%, rgba(165, 122, 83, 0.96) 100%);
+}
+
+.mini-stage-zhongju::before {
+  background:
+    linear-gradient(90deg, rgba(132, 153, 177, 0.24) 0 2px, rgba(0, 0, 0, 0) 2px 50px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 34%),
+    radial-gradient(circle at 20% 26%, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0) 12%);
+}
+
+.mini-stage-bingwang {
+  background:
+    radial-gradient(circle at 50% 22%, rgba(255, 236, 179, 0.28), rgba(255, 255, 255, 0) 34%),
+    linear-gradient(180deg, rgba(210, 224, 205, 0.96), rgba(184, 203, 176, 0.96) 58%, rgba(152, 125, 79, 0.95) 58%, rgba(133, 99, 60, 0.96) 100%);
+}
+
+.mini-stage-bingwang::before {
+  background:
+    repeating-linear-gradient(135deg, rgba(102, 126, 86, 0.14) 0 18px, rgba(133, 154, 109, 0.08) 18px 36px),
+    linear-gradient(90deg, rgba(96, 118, 78, 0.1) 0 2px, rgba(0, 0, 0, 0) 2px 56px);
+}
+
+.mini-stage-yueyueniao {
+  background:
+    radial-gradient(circle at 52% 18%, rgba(255, 232, 160, 0.32), rgba(255, 255, 255, 0) 30%),
+    linear-gradient(180deg, rgba(194, 228, 252, 0.96), rgba(171, 214, 245, 0.96) 54%, rgba(171, 142, 92, 0.95) 54%, rgba(149, 106, 66, 0.96) 100%);
+}
+
+.mini-stage-yueyueniao::before {
+  background:
+    radial-gradient(circle at 16% 24%, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0) 12%),
+    radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 10%);
+}
+
+.roster-card-zhongju .mini-stage::after {
+  box-shadow:
+    inset 0 14px 0 rgba(91, 112, 138, 0.18),
+    inset 0 -16px 0 rgba(140, 94, 58, 0.28);
+}
+
+.roster-card-bingwang .mini-stage::after {
+  box-shadow:
+    inset 0 -16px 0 rgba(111, 86, 44, 0.28);
+}
+
+.roster-card-yueyueniao .mini-stage::after {
+  box-shadow:
+    inset 0 -18px 0 rgba(121, 83, 47, 0.24);
+}
+
+.roster-card-yueyueniao .mini-stage {
+  position: relative;
+}
+
+.roster-card-yueyueniao .mini-stage .avatar {
+  transform: translateY(-2px);
+}
+
+.roster-card-yueyueniao .mini-stage::before {
+  background:
+    radial-gradient(circle at 50% 66%, rgba(135, 92, 52, 0.2), rgba(135, 92, 52, 0) 20%),
+    radial-gradient(circle at 50% 72%, rgba(109, 76, 38, 0.18), rgba(109, 76, 38, 0) 24%),
+    radial-gradient(circle at 16% 24%, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0) 12%),
+    radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 10%);
+}
+
+.roster-name {
+  font-size: 34px;
+  font-weight: 800;
+}
+
+.roster-title {
+  margin-top: 4px;
+  font-size: 16px;
+  color: #8e3e21;
+}
+
+.roster-name,
+.roster-title,
+.roster-tagline {
+  position: relative;
+  z-index: 1;
+}
+
+.roster-tagline {
+  margin-top: 2px;
+}
+
+.roster-tagline,
+.roster-quote,
+.special-desc,
+.catalog-subtitle,
+.catalog-desc,
+.catalog-flavor,
+.fighter-title,
+.status-hint,
+.sake-summary,
+.sheet-line,
+.result-desc,
+.log-text,
+.busy-strip {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.special-card {
+  margin-top: 14px;
+  padding: 18px 20px;
+  border-radius: 22px;
+  background: rgba(122, 35, 21, 0.08);
+}
+
+.roster-quote {
+  margin-top: 10px;
+}
+
+.special-name,
+.catalog-name,
+.log-head,
+.action-title,
+.catalog-title {
+  font-weight: 800;
+  color: #4b1c10;
+}
+
+.pick-btn,
+.special-btn,
+.restart-btn,
+.back-btn,
+.card-btn {
+  border: 0;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+}
+
+.pick-btn:hover,
+.special-btn:hover,
+.restart-btn:hover,
+.back-btn:hover,
+.card-btn:hover {
+  transform: translateY(-2px);
+}
+
+.pick-btn {
+  width: 100%;
+  margin-top: auto;
+  padding: 16px 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7a2315, #b54c22);
+  color: #fff4de;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 4px;
+}
+
+.catalog-board {
+  margin-top: 28px;
+}
+
+.catalog-title {
+  font-size: 32px;
+}
+
+.catalog-list {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.catalog-card,
+.card-btn {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  min-height: 132px;
+  padding: 20px;
+  border-radius: 24px;
+  text-align: left;
+}
+
+.catalog-name-row,
+.skill-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.catalog-icon,
+.skill-icon {
+  font-size: 38px;
+  line-height: 1;
+}
+
+.rarity-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7a2315, #dd5b22);
+  color: #fff6df;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  box-shadow: 0 6px 14px rgba(150, 53, 21, 0.18);
+}
+
+.battle-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding-top: 18px;
+}
+
+.battle-headline {
+  display: flex;
+  flex-direction: column;
+}
+
+.battle-title {
+  font-size: 40px;
+  font-weight: 800;
+  color: #7a2315;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 0 rgba(255, 245, 224, 0.7);
+}
+
+.battle-subtitle {
+  margin-top: 8px;
+  color: #a24d27;
+  font-weight: 700;
+}
+
+.round-lamp {
+  padding: 14px 20px;
+  border-radius: 999px;
+  background: rgba(255, 248, 235, 0.92);
+  color: #a4441e;
+  border: 1px solid rgba(122, 35, 21, 0.12);
+  box-shadow: 0 10px 22px rgba(122, 35, 21, 0.08);
+  font-weight: 700;
+}
+
+.banner-board {
+  margin-top: 18px;
+  font-size: 17px;
+  background:
+    linear-gradient(90deg, rgba(159, 99, 46, 0.08) 0 1px, rgba(0, 0, 0, 0) 1px 18px),
+    linear-gradient(180deg, rgba(255, 250, 241, 0.96), rgba(248, 234, 206, 0.98));
+}
+
+.arena {
+  position: relative;
+  margin-top: 22px;
+  padding: 18px 14px 24px;
+  border-radius: 32px;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 224, 155, 0.55), rgba(255, 224, 155, 0) 24%),
+    linear-gradient(90deg, rgba(164, 109, 63, 0.1) 0 2px, rgba(0, 0, 0, 0) 2px 25%),
+    linear-gradient(180deg, #ead2a6 0, #f6e8cc 18%, #f3dfbb 44%, #d9a064 44%, #c9874b 78%, #b8743e 100%);
+  overflow: hidden;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 250, 238, 0.7),
+    inset 0 -22px 34px rgba(120, 61, 27, 0.1);
+}
+
+.arena::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 42% 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 12%),
+    radial-gradient(circle at 50% 24%, rgba(255, 250, 234, 0.3), rgba(255, 250, 234, 0) 38%),
+    linear-gradient(180deg, rgba(107, 61, 32, 0.06), rgba(107, 61, 32, 0) 18%),
+    repeating-linear-gradient(90deg, rgba(160, 109, 63, 0.08) 0 2px, rgba(0, 0, 0, 0) 2px 56px),
+    radial-gradient(circle at 18% 30%, rgba(168, 88, 48, 0.08), rgba(168, 88, 48, 0) 10%),
+    radial-gradient(circle at 82% 26%, rgba(168, 88, 48, 0.08), rgba(168, 88, 48, 0) 10%);
+  pointer-events: none;
+}
+
+.arena::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 98px;
+  height: 18px;
+  background:
+    linear-gradient(180deg, rgba(110, 52, 23, 0.28), rgba(110, 52, 23, 0.1)),
+    repeating-linear-gradient(90deg, rgba(96, 45, 20, 0.18) 0 18px, rgba(149, 88, 48, 0.16) 18px 36px),
+    linear-gradient(90deg, rgba(255, 220, 167, 0.08), rgba(255, 220, 167, 0) 18%, rgba(255, 220, 167, 0.08) 36%, rgba(255, 220, 167, 0) 54%);
+  box-shadow: 0 -1px 0 rgba(255, 230, 185, 0.24);
+  pointer-events: none;
+}
+
+.noren {
+  position: absolute;
+  top: 0;
+  width: 66px;
+  height: 82px;
+  background:
+    linear-gradient(180deg, rgba(255, 230, 185, 0.08), rgba(0, 0, 0, 0) 22%),
+    repeating-linear-gradient(90deg, rgba(111, 28, 19, 0.96) 0 24px, rgba(136, 43, 27, 0.96) 24px 48px);
+  z-index: 0;
+  opacity: 0.9;
+  box-shadow: 0 10px 20px rgba(76, 24, 13, 0.16);
+}
+
+.noren.left {
+  left: 14px;
+  border-radius: 0 0 18px 18px;
+}
+
+.noren.right {
+  right: 14px;
+  border-radius: 0 0 18px 18px;
+}
+
+.backroom-glow,
+.backroom-lamp,
+.backroom-table,
+.backroom-guest {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.backroom-glow {
+  left: 50%;
+  top: 32px;
+  width: 78%;
+  height: 230px;
+  transform: translateX(-50%);
+  background:
+    radial-gradient(circle at center, rgba(255, 244, 205, 0.42), rgba(255, 244, 205, 0) 68%),
+    radial-gradient(circle at 50% 58%, rgba(255, 207, 129, 0.18), rgba(255, 207, 129, 0) 32%);
+  filter: blur(6px);
+}
+
+.backroom-lamp {
+  top: 58px;
+  width: 46px;
+  height: 62px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 235, 167, 0.95), rgba(255, 132, 70, 0.9) 44%, rgba(173, 64, 29, 0.92));
+  box-shadow: 0 0 18px rgba(255, 186, 106, 0.26);
+  opacity: 0.5;
+}
+
+.backroom-lamp::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -22px;
+  width: 3px;
+  height: 22px;
+  transform: translateX(-50%);
+  background: rgba(248, 239, 220, 0.72);
+}
+
+.lamp-left {
+  left: 168px;
+}
+
+.lamp-mid {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.lamp-right {
+  right: 168px;
+}
+
+.backroom-table {
+  top: 250px;
+  width: 112px;
+  height: 22px;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(145, 96, 58, 0.28), rgba(114, 67, 35, 0.22)),
+    repeating-linear-gradient(90deg, rgba(103, 59, 29, 0.1) 0 12px, rgba(165, 104, 61, 0.08) 12px 24px);
+  filter: blur(0.2px);
+}
+
+.table-left {
+  left: 108px;
+}
+
+.table-mid {
+  left: 50%;
+  width: 126px;
+  transform: translateX(-50%);
+}
+
+.table-right {
+  right: 108px;
+}
+
+.backroom-guest {
+  top: 176px;
+  width: 48px;
+  height: 84px;
+  border-radius: 24px 24px 18px 18px;
+  background: linear-gradient(180deg, rgba(86, 79, 102, 0.24), rgba(65, 57, 76, 0.18));
+  filter: blur(1px);
+  opacity: 0.56;
+}
+
+.backroom-guest::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -24px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: rgba(91, 79, 87, 0.2);
+}
+
+.backroom-guest::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  width: 64px;
+  height: 12px;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: rgba(96, 63, 38, 0.12);
+}
+
+.backroom-guest.guest-mid::after {
+  width: 74px;
+}
+
+.guest-left {
+  left: 126px;
+}
+
+.guest-mid {
+  left: 50%;
+  width: 54px;
+  height: 92px;
+  transform: translateX(-50%);
+}
+
+.guest-right {
+  right: 126px;
+}
+
+.izakaya-decor,
+.izakaya-sticker {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.izakaya-decor {
+  top: 92px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, rgba(255, 247, 229, 0.95), rgba(245, 221, 176, 0.96));
+  color: #8f3b1d;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  box-shadow:
+    0 10px 18px rgba(116, 59, 28, 0.1),
+    inset 0 0 0 1px rgba(143, 59, 29, 0.08);
+}
+
+.menu-left {
+  left: 38px;
+  transform: rotate(-7deg);
+}
+
+.menu-right {
+  right: 38px;
+  transform: rotate(8deg);
+}
+
+.izakaya-sticker {
+  top: 190px;
+  width: 44px;
+  height: 54px;
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(255, 252, 246, 0.94), rgba(243, 226, 196, 0.96));
+  color: #a22f17;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  font-weight: 800;
+  box-shadow: 0 10px 16px rgba(116, 59, 28, 0.08);
+}
+
+.sticker-left {
+  left: 148px;
+  transform: rotate(-9deg);
+}
+
+.sticker-right {
+  right: 148px;
+  transform: rotate(10deg);
+}
+
+.table-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 116px;
+  height: 10px;
+  background:
+    linear-gradient(180deg, rgba(120, 58, 26, 0.52), rgba(96, 42, 19, 0.34)),
+    repeating-linear-gradient(90deg, rgba(109, 52, 23, 0.18) 0 16px, rgba(161, 96, 53, 0.16) 16px 32px);
+}
+
+.fighters-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 128px minmax(0, 1fr);
+  gap: 10px;
+  align-items: end;
+  position: relative;
+  z-index: 1;
+}
+
+.fighter-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.meter-card {
+  width: 100%;
+  position: relative;
+  z-index: 2;
+  padding: 10px 12px 12px;
+  min-height: 104px;
+  border-radius: 16px;
+  background: rgba(255, 251, 245, 0.9);
+}
+
+.meter-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.meter-name {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.08;
+  min-height: 36px;
+  display: flex;
+  align-items: flex-start;
+  white-space: nowrap;
+}
+
+.meter-num,
+.meter-label {
+  font-size: 12px;
+  color: #8d5a3a;
+}
+
+.meter-num {
+  white-space: nowrap;
+  flex: 0 0 auto;
+  min-width: 52px;
+  text-align: right;
+}
+
+.meter-label {
+  margin-top: 8px;
+}
+
+.meter-track {
+  margin-top: 8px;
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(111, 54, 30, 0.12);
+  overflow: hidden;
+}
+
+.fighter-title {
+  margin-top: 10px;
+  color: #8f361a;
+  font-size: 17px;
+  font-weight: 700;
+  text-shadow: 0 1px 0 rgba(255, 243, 214, 0.55);
+}
+
+.meter-fill {
+  height: 100%;
+  border-radius: inherit;
+  transition: width 0.35s ease;
+}
+
+.player-fill {
+  background: linear-gradient(90deg, #f6ce72, #db6334, #b52a18);
+}
+
+.enemy-fill {
+  background: linear-gradient(90deg, #f4d7a2, #cd8232, #9f3119);
+}
+
+.stage-box {
+  width: 100%;
+  height: 184px;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  padding-top: 26px;
+}
+
+.status-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.status-chip {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(122, 35, 21, 0.12);
+  color: #6c2d18;
+  font-size: 13px;
+}
+
+.status-chip.muted {
+  background: rgba(111, 78, 52, 0.1);
+  color: #7b604e;
+}
+
+.center-board {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  order: 0;
+  position: relative;
+  z-index: 2;
+  margin-top: -6px;
+}
+
+.sake-bottle {
+  position: relative;
+  width: 128px;
+  padding: 22px 10px 16px;
+  border-radius: 28px 28px 16px 16px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 22%),
+    linear-gradient(180deg, #fff8ea, #f0cf93);
+  box-shadow: 0 14px 28px rgba(120, 63, 29, 0.12);
+}
+
+.sake-cap {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 62px;
+  height: 22px;
+  border-radius: 14px;
+  background: #7a2315;
+}
+
+.sake-label {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #8b3a1d;
+}
+
+.round-sheet {
+  width: 128px;
+  padding: 10px 8px;
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0) 28%),
+    rgba(255, 249, 239, 0.93);
+  box-shadow: 0 14px 24px rgba(117, 63, 31, 0.08);
+}
+
+.action-board {
+  margin-top: 22px;
+}
+
+.action-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 16px;
+}
+
+.action-meta {
+  flex: 1.2;
+  min-width: 0;
+}
+
+.special-action-box {
+  flex: 0.9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.special-callout {
+  margin-top: 14px;
+  padding: 16px 18px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(255, 244, 223, 0.98), rgba(255, 232, 189, 0.94));
+  border: 1px solid rgba(180, 76, 34, 0.18);
+  box-shadow: 0 14px 28px rgba(122, 35, 21, 0.08);
+}
+
+.special-callout-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(122, 35, 21, 0.1);
+  color: #9a3f1d;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.special-callout-name {
+  margin-top: 10px;
+  color: #4b1c10;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.special-callout-desc {
+  margin-top: 8px;
+  color: #8f361a;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.65;
+}
+
+.special-callout-flavor {
+  margin-top: 8px;
+  color: #9b6948;
+  line-height: 1.7;
+}
+
+.special-btn,
+.restart-btn,
+.back-btn {
+  min-height: 48px;
+  padding: 0 22px;
+  border-radius: 999px;
+}
+
+.special-btn,
+.restart-btn {
+  background: linear-gradient(90deg, #7a2315, #bc4d23);
+  color: #fff4de;
+}
+
+.special-btn {
+  width: 100%;
+  min-width: 0;
+  box-shadow: 0 16px 30px rgba(122, 35, 21, 0.16);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.back-btn {
+  background: rgba(122, 35, 21, 0.08);
+  color: #7a2315;
+}
+
+.special-btn.disabled,
+.special-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.busy-strip {
+  margin-top: 16px;
+  padding: 14px 18px;
+  border-radius: 18px;
+  background: rgba(122, 35, 21, 0.08);
+  color: #8b341c;
+}
+
+.special-float {
+  position: absolute;
+  top: 118px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  min-width: 180px;
+  max-width: 72%;
+  padding: 10px 14px 12px;
+  border-radius: 18px;
+  background: rgba(255, 250, 242, 0.95);
+  box-shadow: 0 18px 30px rgba(96, 41, 17, 0.16);
+  animation: pop-special 0.55s ease;
+  pointer-events: none;
+}
+
+.special-float.player {
+  border: 2px solid rgba(199, 88, 35, 0.32);
+}
+
+.special-float.enemy {
+  border: 2px solid rgba(103, 86, 210, 0.26);
+}
+
+.special-float-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(122, 35, 21, 0.12);
+  color: #9a3f1d;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.special-float-text {
+  margin-top: 8px;
+  color: #4d2012;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.special-float-sparks span {
+  position: absolute;
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  opacity: 0;
+  animation: spark-burst 0.9s ease-out forwards;
+}
+
+.special-float-sparks span:nth-child(1) {
+  right: 18px;
+  top: -10px;
+  animation-delay: 0.02s;
+}
+
+.special-float-sparks span:nth-child(2) {
+  right: 40px;
+  top: -18px;
+  animation-delay: 0.12s;
+}
+
+.special-float-sparks span:nth-child(3) {
+  right: 58px;
+  top: -6px;
+  animation-delay: 0.18s;
+}
+
+.special-float.flame .special-float-sparks span {
+  background: radial-gradient(circle at 40% 35%, #ffe8a2, #ff8b2b 60%, #c84216 100%);
+  clip-path: polygon(50% 0, 72% 24%, 88% 48%, 66% 100%, 34% 100%, 12% 48%, 28% 24%);
+}
+
+.special-float.lightning .special-float-sparks span {
+  background: linear-gradient(180deg, #fff7a8, #9ec6ff 48%, #5761ff 100%);
+  clip-path: polygon(40% 0, 100% 0, 64% 42%, 86% 42%, 24% 100%, 42% 58%, 18% 58%);
+}
+
+.hand-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.card-btn {
+  width: 100%;
+  color: #452012;
+  box-shadow: 0 10px 26px rgba(90, 41, 18, 0.08);
+}
+
+.card-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+}
+
+.skill-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skill-name {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.result-panel {
+  margin-top: 22px;
+}
+
+.result-title {
+  font-size: 36px;
+  font-weight: 800;
+}
+
+.result-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.log-card {
+  margin-top: 22px;
+}
+
+.log-scroll {
+  max-height: 360px;
+  overflow: auto;
+  margin-top: 16px;
+  padding-right: 6px;
+}
+
+.log-item {
+  display: flex;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 2px dashed rgba(122, 35, 21, 0.1);
+}
+
+.log-round {
+  flex: 0 0 68px;
+  color: #b14c22;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.avatar {
+  position: relative;
+  width: 164px;
+  height: 222px;
+}
+
+.avatar.mini {
+  width: 150px;
+  height: 200px;
+}
+
+.avatar-shadow {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+  width: 108px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(92, 48, 20, 0.18);
+}
+
+.avatar-body {
+  position: absolute;
+  left: 50%;
+  bottom: 34px;
+  width: 94px;
+  height: 104px;
+  border-radius: 28px 28px 34px 34px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, #6f2730, #4b171d);
+}
+
+.avatar-body-detail,
+.avatar-jacket,
+.avatar-collar,
+.avatar-tie,
+.avatar-badge {
+  position: absolute;
+}
+
+.avatar-body-detail {
+  left: 50%;
+  bottom: 72px;
+  width: 72px;
+  height: 36px;
+  transform: translateX(-50%);
+  border-radius: 18px;
+  opacity: 0.9;
+}
+
+.avatar-jacket {
+  bottom: 84px;
+  width: 30px;
+  height: 72px;
+  opacity: 0;
+}
+
+.avatar-jacket.left {
+  left: 44px;
+  border-radius: 26px 10px 28px 14px;
+}
+
+.avatar-jacket.right {
+  right: 44px;
+  border-radius: 10px 26px 14px 28px;
+}
+
+.avatar-collar {
+  bottom: 116px;
+  width: 18px;
+  height: 18px;
+  opacity: 0;
+}
+
+.avatar-collar.left {
+  left: 65px;
+}
+
+.avatar-collar.right {
+  right: 65px;
+}
+
+.avatar-tie {
+  left: 50%;
+  bottom: 84px;
+  width: 12px;
+  height: 38px;
+  transform: translateX(-50%);
+  opacity: 0;
+}
+
+.avatar-badge {
+  left: 50%;
+  bottom: 90px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  opacity: 0;
+}
+
+.avatar-sash {
+  position: absolute;
+  left: 50%;
+  bottom: 82px;
+  width: 82px;
+  height: 16px;
+  border-radius: 999px;
+  transform: translateX(-50%);
+  background: rgba(245, 221, 166, 0.9);
+}
+
+.avatar-arm {
+  position: absolute;
+  bottom: 90px;
+  width: 24px;
+  height: 76px;
+  border-radius: 999px;
+  background: #f2c28b;
+  transform-origin: center top;
+}
+
+.avatar-arm.left {
+  left: 22px;
+  transform: rotate(18deg);
+}
+
+.avatar-arm.right {
+  right: 22px;
+  transform: rotate(-16deg);
+}
+
+.avatar-prop {
+  position: absolute;
+  pointer-events: none;
+}
+
+.avatar-prop.main {
+  right: 2px;
+  bottom: 86px;
+  width: 46px;
+  height: 60px;
+  border-radius: 12px 12px 16px 16px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(229, 240, 248, 0.92) 48%, rgba(159, 198, 228, 0.95)),
+    linear-gradient(180deg, rgba(120, 168, 206, 0.4), rgba(244, 248, 250, 0));
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.55),
+    0 10px 18px rgba(72, 111, 149, 0.16);
+  transform: rotate(-9deg);
+}
+
+.avatar-prop.main::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  right: 7px;
+  top: 9px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.avatar-prop.main::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 12px;
+  height: 16px;
+  border-radius: 0 0 10px 10px;
+  background: linear-gradient(180deg, rgba(176, 213, 241, 0.1), rgba(125, 175, 214, 0.8));
+}
+
+.avatar-prop.alt {
+  opacity: 0;
+}
+
+.avatar::before,
+.avatar::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.avatar-head {
+  position: absolute;
+  left: 50%;
+  bottom: 116px;
+  width: 82px;
+  height: 86px;
+  border-radius: 44px 44px 40px 40px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, #ffd7af, #f3be87);
+}
+
+.avatar-hair {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 0;
+  height: 30px;
+  border-radius: 34px 34px 16px 16px;
+  background: #3e241a;
+}
+
+.avatar-brow,
+.avatar-eye,
+.avatar-mouth {
+  position: absolute;
+  background: #3d1d13;
+}
+
+.avatar-brow {
+  top: 31px;
+  width: 20px;
+  height: 6px;
+  border-radius: 6px;
+}
+
+.avatar-brow.left,
+.avatar-eye.left,
+.avatar-cheek.left {
+  left: 16px;
+}
+
+.avatar-brow.right,
+.avatar-eye.right,
+.avatar-cheek.right {
+  right: 16px;
+}
+
+.avatar-eye {
+  top: 44px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.avatar-cheek {
+  position: absolute;
+  top: 55px;
+  width: 16px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(233, 109, 109, 0.42);
+}
+
+.avatar-mouth {
+  left: 50%;
+  bottom: 14px;
+  width: 24px;
+  height: 9px;
+  border-radius: 0 0 18px 18px;
+  transform: translateX(-50%);
+}
+
+.pose-sign {
+  position: absolute;
+  left: 50%;
+  top: 6px;
+  transform: translateX(-50%) rotate(-10deg);
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 251, 245, 0.92);
+  color: #8d311a;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.avatar-zhongju .avatar-body {
+  background: linear-gradient(180deg, #203751, #162638);
+}
+
+.avatar-zhongju .avatar-body-detail {
+  background: linear-gradient(180deg, rgba(58, 92, 126, 0.95), rgba(35, 54, 79, 0.98));
+}
+
+.avatar-zhongju .avatar-jacket,
+.avatar-zhongju .avatar-collar,
+.avatar-zhongju .avatar-tie,
+.avatar-zhongju .avatar-badge {
+  opacity: 1;
+}
+
+.avatar-zhongju .avatar-jacket.left {
+  background: linear-gradient(180deg, #11253a, #203c58);
+  transform: rotate(10deg);
+}
+
+.avatar-zhongju .avatar-jacket.right {
+  background: linear-gradient(180deg, #11253a, #203c58);
+  transform: rotate(-10deg);
+}
+
+.avatar-zhongju .avatar-collar.left {
+  background: linear-gradient(180deg, #fefefe, #dfe7ef);
+  clip-path: polygon(0 0, 100% 0, 60% 100%, 16% 78%);
+}
+
+.avatar-zhongju .avatar-collar.right {
+  background: linear-gradient(180deg, #fefefe, #dfe7ef);
+  clip-path: polygon(0 0, 100% 0, 84% 78%, 40% 100%);
+}
+
+.avatar-zhongju .avatar-tie {
+  background: linear-gradient(180deg, #c83e29, #7d1e18);
+  clip-path: polygon(50% 0, 100% 18%, 74% 100%, 26% 100%, 0 18%);
+}
+
+.avatar-zhongju .avatar-badge {
+  left: 106px;
+  background: radial-gradient(circle at 35% 35%, #f8d991, #c58a2e 72%);
+  box-shadow: 0 0 0 2px rgba(255, 237, 201, 0.45);
+}
+
+.avatar-zhongju .avatar-sash {
+  background: linear-gradient(90deg, #d2d7db, #f1f3f4, #cfd8df);
+}
+
+.avatar-zhongju .avatar-prop.main {
+  right: -2px;
+  bottom: 84px;
+  width: 56px;
+  height: 68px;
+}
+
+.avatar-bingwang .avatar-body {
+  background:
+    linear-gradient(180deg, #456f4a, #263d27),
+    repeating-linear-gradient(145deg, rgba(188, 168, 101, 0.3) 0 10px, rgba(78, 97, 47, 0.25) 10px 18px);
+}
+
+.avatar-bingwang .avatar-body-detail {
+  background:
+    repeating-linear-gradient(145deg, rgba(182, 163, 101, 0.95) 0 12px, rgba(72, 92, 44, 0.9) 12px 24px, rgba(50, 74, 43, 0.94) 24px 36px);
+  box-shadow: inset 0 0 0 2px rgba(35, 56, 31, 0.14);
+}
+
+.avatar-bingwang .avatar-sash {
+  background: linear-gradient(90deg, #b54934, #d35c45);
+}
+
+.avatar-bingwang .avatar-hair {
+  background: #2b1b10;
+  height: 30px;
+}
+
+.avatar-bingwang .avatar-prop.main {
+  width: 48px;
+  height: 76px;
+  right: 2px;
+  bottom: 84px;
+}
+
+.avatar-yueyueniao .avatar-body {
+  background: linear-gradient(180deg, #355772, #253c54);
+}
+
+.avatar-yueyueniao .avatar-body-detail {
+  background: linear-gradient(180deg, rgba(53, 102, 145, 0.65), rgba(31, 62, 91, 0.45));
+}
+
+.avatar-yueyueniao .avatar-sash {
+  background: #f2d48a;
+}
+
+.avatar-yueyueniao .avatar-hair {
+  height: 28px;
+  background: #523127;
+}
+
+.avatar-yueyueniao .avatar-prop.main {
+  width: 46px;
+  height: 74px;
+  right: 2px;
+  bottom: 84px;
+}
+
+.avatar-yueyueniao .avatar-prop.alt {
+  opacity: 1;
+  left: 6px;
+  bottom: 100px;
+  width: 50px;
+  height: 34px;
+  border-radius: 14px 14px 10px 10px;
+  background: linear-gradient(180deg, #fff6cf, #e98f2f 62%, #b84d1a);
+  box-shadow: 0 8px 16px rgba(151, 70, 18, 0.2);
+  transform: rotate(18deg);
+}
+
+.avatar-yueyueniao .avatar-prop.alt::before {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: 10px;
+  width: 16px;
+  height: 12px;
+  border-radius: 12px 0 0 12px;
+  background: #c26c1d;
+}
+
+.avatar-yueyueniao .avatar-prop.alt::after {
+  content: "";
+  position: absolute;
+  right: -14px;
+  top: 8px;
+  width: 18px;
+  height: 18px;
+  clip-path: polygon(0 22%, 100% 0, 100% 100%, 0 78%);
+  background: linear-gradient(180deg, #f5df96, #c15c26);
+}
+
+.avatar-yanchang_changzhang .avatar-body {
+  background: linear-gradient(180deg, #5a3a2e, #2e1b16);
+}
+
+.avatar-yanchang_changzhang .avatar-body-detail {
+  background: linear-gradient(180deg, rgba(132, 89, 68, 0.9), rgba(78, 48, 38, 0.92));
+}
+
+.avatar-yanchang_changzhang .avatar-hair {
+  background: #2a1712;
+}
+
+.avatar-yanchang_changzhang .avatar-prop.main {
+  width: 54px;
+  height: 16px;
+  right: 6px;
+  bottom: 124px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #efe5cc 0 74%, #b87432 74% 100%);
+  box-shadow: 0 0 0 2px rgba(255, 245, 226, 0.18);
+}
+
+.avatar-yanchang_changzhang .avatar-prop.main::before {
+  left: auto;
+  right: -6px;
+  top: 3px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 216, 128, 0.95), rgba(255, 109, 44, 0.78) 58%, rgba(255, 109, 44, 0) 70%);
+}
+
+.avatar-yanchang_changzhang::before {
+  opacity: 1;
+  right: 4px;
+  top: 42px;
+  width: 42px;
+  height: 54px;
+  background:
+    radial-gradient(circle at 32% 72%, rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0) 32%),
+    radial-gradient(circle at 70% 28%, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 34%);
+  filter: blur(3px);
+}
+
+.avatar-ma_zong .avatar-body {
+  background: linear-gradient(180deg, #2a314b, #171c31);
+}
+
+.avatar-ma_zong .avatar-body-detail {
+  background: linear-gradient(180deg, rgba(70, 92, 132, 0.8), rgba(31, 45, 78, 0.92));
+}
+
+.avatar-ma_zong .avatar-jacket,
+.avatar-ma_zong .avatar-collar,
+.avatar-ma_zong .avatar-tie {
+  opacity: 1;
+}
+
+.avatar-ma_zong .avatar-jacket.left,
+.avatar-ma_zong .avatar-jacket.right {
+  background: linear-gradient(180deg, #111728, #243149);
+}
+
+.avatar-ma_zong .avatar-collar.left,
+.avatar-ma_zong .avatar-collar.right {
+  background: linear-gradient(180deg, #f4f7fa, #dfe7ef);
+}
+
+.avatar-ma_zong .avatar-tie {
+  background: linear-gradient(180deg, #d8a434, #8f551a);
+  clip-path: polygon(50% 0, 100% 18%, 74% 100%, 26% 100%, 0 18%);
+}
+
+.avatar-ma_zong .avatar-eye {
+  width: 20px;
+  height: 8px;
+  border-radius: 999px;
+  top: 44px;
+  background: linear-gradient(90deg, #0b0f16, #232a39);
+}
+
+.avatar-ma_zong .avatar-eye.left {
+  left: 12px;
+}
+
+.avatar-ma_zong .avatar-eye.right {
+  right: 12px;
+}
+
+.avatar-ma_zong .avatar-brow {
+  opacity: 0;
+}
+
+.avatar-yuwen_laoshi {
+  width: 182px;
+}
+
+.avatar-yuwen_laoshi .avatar-body {
+  width: 112px;
+  height: 124px;
+  border-radius: 30px 30px 36px 36px;
+  background: linear-gradient(180deg, #7b5132, #4d2f1f);
+}
+
+.avatar-yuwen_laoshi .avatar-body-detail {
+  width: 90px;
+  height: 42px;
+  bottom: 70px;
+  background: linear-gradient(180deg, rgba(226, 189, 92, 0.92), rgba(180, 124, 46, 0.95));
+}
+
+.avatar-yuwen_laoshi .avatar-head {
+  width: 92px;
+  height: 92px;
+  border-radius: 48px;
+}
+
+.avatar-yuwen_laoshi .avatar-hair {
+  height: 22px;
+  background: #3c2419;
+}
+
+.avatar-yuwen_laoshi .avatar-eye {
+  width: 11px;
+  height: 11px;
+}
+
+.avatar-yuwen_laoshi .avatar-eye::before {
+  content: "";
+  position: absolute;
+  left: -7px;
+  top: -5px;
+  width: 24px;
+  height: 18px;
+  border: 2px solid rgba(61, 40, 23, 0.82);
+  border-radius: 12px;
+}
+
+.avatar-yuwen_laoshi .avatar-mouth {
+  width: 34px;
+  height: 14px;
+  border-radius: 0 0 22px 22px;
+  transform: translateX(-50%) rotate(-4deg);
+}
+
+.avatar-yuwen_laoshi .avatar-cheek {
+  width: 18px;
+  height: 12px;
+  background: rgba(244, 103, 103, 0.52);
+}
+
+.tipsy-warm .avatar-cheek {
+  background: rgba(228, 95, 95, 0.65);
+}
+
+.tipsy-wobble {
+  animation: wobble-actor 1.2s ease-in-out infinite;
+}
+
+.tipsy-ko {
+  transform: rotate(76deg) translateY(18px);
+}
+
+.result-winner {
+  animation: winner-cheer 1s ease-in-out infinite alternate;
+}
+
+.result-winner .avatar-arm.right {
+  transform: rotate(-78deg);
+}
+
+.result-winner .avatar-prop.main {
+  transform: rotate(-34deg) translate(6px, -26px) scale(1.08);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.65),
+    0 16px 24px rgba(72, 111, 149, 0.22);
+}
+
+.result-winner::before {
+  top: 18px;
+  left: 18px;
+  right: 18px;
+  height: 72px;
+  opacity: 1;
+  background:
+    radial-gradient(circle at 16% 44%, rgba(255, 205, 84, 0.95) 0 10px, rgba(255, 205, 84, 0) 11px),
+    radial-gradient(circle at 16% 44%, rgba(255, 126, 59, 0.8) 0 22px, rgba(255, 126, 59, 0) 23px),
+    radial-gradient(circle at 50% 18%, rgba(255, 224, 120, 0.95) 0 8px, rgba(255, 224, 120, 0) 9px),
+    radial-gradient(circle at 50% 18%, rgba(240, 81, 43, 0.72) 0 18px, rgba(240, 81, 43, 0) 19px),
+    radial-gradient(circle at 82% 42%, rgba(121, 192, 255, 0.95) 0 10px, rgba(121, 192, 255, 0) 11px),
+    radial-gradient(circle at 82% 42%, rgba(58, 116, 255, 0.76) 0 22px, rgba(58, 116, 255, 0) 23px);
+  animation: fireworks-bloom 1.15s ease-in-out infinite;
+}
+
+.result-winner::after {
+  inset: 34px -6px auto -6px;
+  height: 132px;
+  opacity: 1;
+  background:
+    linear-gradient(120deg, rgba(232, 70, 58, 0) 0 8%, rgba(232, 70, 58, 0.92) 8% 10%, rgba(232, 70, 58, 0) 10% 100%),
+    linear-gradient(108deg, rgba(255, 204, 77, 0) 0 28%, rgba(255, 204, 77, 0.94) 28% 30%, rgba(255, 204, 77, 0) 30% 100%),
+    linear-gradient(132deg, rgba(56, 167, 255, 0) 0 52%, rgba(56, 167, 255, 0.92) 52% 54%, rgba(56, 167, 255, 0) 54% 100%),
+    linear-gradient(100deg, rgba(92, 196, 129, 0) 0 74%, rgba(92, 196, 129, 0.9) 74% 76%, rgba(92, 196, 129, 0) 76% 100%);
+  animation: confetti-fall 1.3s linear infinite;
+}
+
+.result-loser {
+  transform: rotate(76deg) translateY(18px);
+}
+
+.result-loser .avatar-head::before,
+.result-loser .avatar-head::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  width: 22px;
+  height: 22px;
+  background:
+    radial-gradient(circle, rgba(255, 234, 110, 0.96) 0 26%, rgba(255, 234, 110, 0) 27%),
+    linear-gradient(0deg, rgba(255, 214, 64, 0) 44%, rgba(255, 214, 64, 0.95) 44% 56%, rgba(255, 214, 64, 0) 56%),
+    linear-gradient(72deg, rgba(255, 214, 64, 0) 44%, rgba(255, 214, 64, 0.95) 44% 56%, rgba(255, 214, 64, 0) 56%),
+    linear-gradient(144deg, rgba(255, 214, 64, 0) 44%, rgba(255, 214, 64, 0.95) 44% 56%, rgba(255, 214, 64, 0) 56%);
+  filter: drop-shadow(0 0 8px rgba(255, 217, 87, 0.4));
+  animation: dizzy-star 1s linear infinite;
+}
+
+.result-loser .avatar-head::before {
+  left: 10px;
+}
+
+.result-loser .avatar-head::after {
+  right: 10px;
+  animation-delay: -0.5s;
+}
+
+.pose-idle {
+  animation: idle-actor 1.8s ease-in-out infinite;
+}
+
+.pose-toast .avatar-arm.right {
+  transform: rotate(-56deg);
+}
+
+.pose-toast .avatar-prop.main {
+  transform: rotate(-30deg) translateY(-16px);
+}
+
+.pose-water .avatar-prop.main {
+  transform: rotate(22deg) translateY(16px);
+}
+
+.pose-water .avatar-arm.right {
+  transform: rotate(-34deg);
+}
+
+.pose-fish .avatar-mouth {
+  width: 34px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.pose-nap {
+  transform: rotate(84deg) translate(26px, 18px);
+}
+
+.pose-command .avatar-arm.right {
+  transform: rotate(-78deg);
+}
+
+.pose-command .avatar-prop.main {
+  transform: rotate(-18deg) translateY(-8px) scale(1.05);
+}
+
+.pose-god {
+  animation: god-actor 0.9s ease-in-out infinite alternate;
+}
+
+.pose-god .avatar-head {
+  box-shadow: 0 0 26px rgba(255, 196, 77, 0.58);
+}
+
+.pose-run {
+  animation: run-actor 0.45s linear infinite alternate;
+}
+
+.pose-run .avatar-arm.left {
+  transform: rotate(44deg);
+}
+
+.pose-run .avatar-arm.right {
+  transform: rotate(-58deg);
+}
+
+.pose-smirk .avatar-mouth {
+  width: 34px;
+  height: 8px;
+  border-radius: 0 0 24px 24px;
+  transform: translateX(-50%) rotate(-8deg);
+}
+
+.pose-eat .avatar-prop.main {
+  width: 54px;
+  height: 20px;
+  border-radius: 999px;
+  transform: rotate(-12deg) translateY(-8px);
+  background: linear-gradient(90deg, #d29b42, #efdb9d);
+}
+
+.pose-shrug .avatar-arm.left {
+  transform: rotate(42deg);
+}
+
+.pose-shrug .avatar-arm.right {
+  transform: rotate(-42deg);
+}
+
+.pose-snap .avatar-arm.right {
+  transform: rotate(-64deg);
+}
+
+.tone-plum {
+  background: linear-gradient(180deg, #fff6f7, #f4d0d6);
+}
+
+.tone-amber {
+  background: linear-gradient(180deg, #fff8e7, #f1d59d);
+}
+
+.tone-teal {
+  background: linear-gradient(180deg, #f0fffd, #cce8e4);
+}
+
+.tone-mist {
+  background: linear-gradient(180deg, #f8fbff, #dce9f4);
+}
+
+.tone-rare-water {
+  background:
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0) 24%),
+    radial-gradient(circle at bottom left, rgba(159, 224, 255, 0.35), rgba(159, 224, 255, 0) 32%),
+    linear-gradient(135deg, #d9f2ff, #8fd6ff 48%, #59a7ff 100%);
+  color: #11385d;
+  box-shadow: 0 16px 30px rgba(67, 130, 183, 0.22);
+  position: relative;
+  overflow: hidden;
+}
+
+.tone-rare-water::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0) 12%, rgba(255, 255, 255, 0.36) 28%, rgba(255, 255, 255, 0) 46%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0 10px, rgba(255, 255, 255, 0) 10px 24px);
+  pointer-events: none;
+}
+
+.tone-rare-water .catalog-name,
+.tone-rare-water .skill-name,
+.tone-rare-water .catalog-desc {
+  color: #11385d;
+}
+
+.tone-rare-water .catalog-flavor {
+  color: rgba(17, 56, 93, 0.78);
+}
+
+.tone-rare-water .skill-icon,
+.tone-rare-water .catalog-icon {
+  filter: drop-shadow(0 8px 14px rgba(57, 120, 179, 0.22));
+}
+
+.tone-gold {
+  background: linear-gradient(180deg, #fff8ee, #efd7ac);
+}
+
+.tone-brick {
+  background: linear-gradient(180deg, #fff5f1, #efccb8);
+}
+
+.tone-ink {
+  background: linear-gradient(180deg, #f8f6f5, #dad1cf);
+}
+
+.tone-rare-bull {
+  background:
+    radial-gradient(circle at top right, rgba(255, 240, 197, 0.9), rgba(255, 240, 197, 0) 28%),
+    linear-gradient(135deg, #7f1f15, #d44a22 38%, #ffbd4d 100%);
+  color: #fff6e9;
+  box-shadow: 0 16px 30px rgba(155, 60, 20, 0.22);
+  position: relative;
+  overflow: hidden;
+}
+
+.tone-rare-bull::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0) 18%, rgba(255, 248, 219, 0.28) 34%, rgba(255, 255, 255, 0) 52%);
+  pointer-events: none;
+}
+
+.tone-rare-bull .catalog-name,
+.tone-rare-bull .skill-name,
+.tone-rare-bull .catalog-desc,
+.tone-rare-bull .catalog-flavor {
+  color: #fff6e9;
+}
+
+.tone-rare-bull .catalog-flavor {
+  color: rgba(255, 245, 226, 0.86);
+}
+
+.tone-rare-bull .skill-icon,
+.tone-rare-bull .catalog-icon {
+  filter: drop-shadow(0 8px 14px rgba(92, 26, 9, 0.26));
+}
+
+.tone-rare-gag {
+  background:
+    radial-gradient(circle at top right, rgba(255, 243, 209, 0.84), rgba(255, 243, 209, 0) 24%),
+    radial-gradient(circle at bottom left, rgba(197, 245, 182, 0.24), rgba(197, 245, 182, 0) 30%),
+    linear-gradient(135deg, #6e8d2a, #9fc13e 36%, #ebc65d 72%, #ff9a43 100%);
+  color: #2f250f;
+  box-shadow: 0 16px 30px rgba(114, 120, 32, 0.22);
+  position: relative;
+}
+
+.tone-rare-gag::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0) 14%, rgba(255, 248, 221, 0.24) 30%, rgba(255, 255, 255, 0) 48%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0 10px, rgba(255, 255, 255, 0) 10px 24px);
+  pointer-events: none;
+}
+
+.tone-rare-gag .catalog-name,
+.tone-rare-gag .skill-name,
+.tone-rare-gag .catalog-desc {
+  color: #2f250f;
+}
+
+.tone-rare-gag .catalog-flavor {
+  color: rgba(47, 37, 15, 0.8);
+}
+
+.tone-rare-gag .skill-icon,
+.tone-rare-gag .catalog-icon {
+  filter: drop-shadow(0 8px 14px rgba(86, 92, 20, 0.22));
+}
+
+@keyframes float-lantern {
+  from { transform: translateY(0); }
+  to { transform: translateY(10px); }
+}
+
+@keyframes pop-special {
+  0% { opacity: 0; transform: translateX(-50%) translateY(14px) scale(0.86); }
+  60% { opacity: 1; transform: translateX(-50%) translateY(-4px) scale(1.03); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+@keyframes spark-burst {
+  0% { opacity: 0; transform: translateY(8px) scale(0.4) rotate(0deg); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-18px) scale(1.08) rotate(24deg); }
+}
+
+@keyframes idle-actor {
+  from { transform: translateY(0); }
+  to { transform: translateY(-6px); }
+}
+
+@keyframes wobble-actor {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(-4deg); }
+  75% { transform: rotate(4deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes god-actor {
+  from { transform: translateY(0) scale(1); }
+  to { transform: translateY(-8px) scale(1.04); }
+}
+
+@keyframes winner-cheer {
+  from { transform: translateY(0) rotate(-2deg); }
+  to { transform: translateY(-10px) rotate(2deg); }
+}
+
+@keyframes fireworks-bloom {
+  0% { transform: scale(0.72); opacity: 0.52; }
+  55% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.08); opacity: 0.42; }
+}
+
+@keyframes confetti-fall {
+  0% { transform: translateY(-10px); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(36px); opacity: 0; }
+}
+
+@keyframes dizzy-star {
+  0% { transform: rotate(0deg) translateY(0); }
+  25% { transform: rotate(90deg) translate(-2px, -6px); }
+  50% { transform: rotate(180deg) translateY(-10px); }
+  75% { transform: rotate(270deg) translate(2px, -6px); }
+  100% { transform: rotate(360deg) translateY(0); }
+}
+
+@keyframes run-actor {
+  from { transform: translateX(-8px) rotate(-3deg); }
+  to { transform: translateX(8px) rotate(3deg); }
+}
+
+@media (min-width: 1081px) {
+  #app {
+    max-width: 1240px;
+  }
+
+  .hero-banner {
+    grid-template-columns: 180px 1fr;
+    align-items: center;
+  }
+
+  .hero-icon {
+    max-width: 180px;
+  }
+
+  .roster {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .catalog-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .battle-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+    padding-top: 28px;
+  }
+
+  .battle-title {
+    font-size: 48px;
+    letter-spacing: 4px;
+  }
+
+  .arena {
+    padding: 32px 18px 28px;
+  }
+
+  .noren {
+    width: 110px;
+    height: 140px;
+    opacity: 1;
+  }
+
+  .noren.left {
+    left: 18px;
+  }
+
+  .noren.right {
+    right: 18px;
+  }
+
+  .fighters-row {
+    grid-template-columns: 1fr 230px 1fr;
+    gap: 10px;
+    align-items: end;
+  }
+
+  .stage-box {
+    height: 360px;
+  }
+
+  .center-board {
+    order: 0;
+    margin-top: -84px;
+  }
+
+  .hand-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .result-actions {
+    flex-direction: row;
+  }
+
+  .avatar {
+    width: 200px;
+    height: 260px;
+  }
+
+  .avatar-shadow {
+    width: 132px;
+    height: 24px;
+  }
+
+  .avatar-body {
+    bottom: 42px;
+    width: 112px;
+    height: 122px;
+  }
+
+  .avatar-body-detail {
+    bottom: 84px;
+    width: 86px;
+    height: 42px;
+  }
+
+  .avatar-jacket {
+    bottom: 98px;
+    width: 36px;
+    height: 82px;
+  }
+
+  .avatar-jacket.left {
+    left: 54px;
+  }
+
+  .avatar-jacket.right {
+    right: 54px;
+  }
+
+  .avatar-collar {
+    bottom: 134px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .avatar-collar.left {
+    left: 80px;
+  }
+
+  .avatar-collar.right {
+    right: 80px;
+  }
+
+  .avatar-tie {
+    bottom: 98px;
+    width: 14px;
+    height: 44px;
+  }
+
+  .avatar-badge {
+    bottom: 104px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .avatar-sash {
+    bottom: 98px;
+    width: 96px;
+    height: 18px;
+  }
+
+  .avatar-arm {
+    bottom: 104px;
+    width: 30px;
+    height: 94px;
+  }
+
+  .avatar-arm.left {
+    left: 26px;
+  }
+
+  .avatar-arm.right {
+    right: 26px;
+  }
+
+  .avatar-prop.main {
+    bottom: 100px;
+    width: 46px;
+    height: 72px;
+  }
+
+  .avatar-yueyueniao .avatar-prop.alt {
+    left: 10px;
+    bottom: 118px;
+    width: 58px;
+    height: 40px;
+  }
+
+  .avatar-head {
+    bottom: 138px;
+    width: 96px;
+    height: 100px;
+  }
+
+  .avatar-hair {
+    height: 36px;
+  }
+
+  .avatar-brow {
+    top: 36px;
+    width: 24px;
+  }
+
+  .avatar-brow.left,
+  .avatar-eye.left,
+  .avatar-cheek.left {
+    left: 18px;
+  }
+
+  .avatar-brow.right,
+  .avatar-eye.right,
+  .avatar-cheek.right {
+    right: 18px;
+  }
+
+  .avatar-eye {
+    top: 50px;
+    width: 12px;
+    height: 12px;
+  }
+
+  .avatar-cheek {
+    top: 64px;
+    width: 18px;
+    height: 12px;
+  }
+
+  .avatar-mouth {
+    bottom: 16px;
+    width: 28px;
+    height: 10px;
+  }
+}
+
+@media (max-width: 720px) {
+  .page-shell {
+    padding: 10px 8px 16px;
+  }
+
+  .paper-bg {
+    top: 58px;
+    right: 4px;
+    left: 4px;
+    border-radius: 18px;
+  }
+
+  .lantern {
+    width: 36px;
+    height: 52px;
+  }
+
+  .lantern-row {
+    padding: 0 2px;
+  }
+
+  #app {
+    max-width: 100%;
+  }
+
+  .hero-banner,
+  .roster-card,
+  .catalog-board,
+  .banner-board,
+  .arena,
+  .action-board,
+  .result-panel,
+  .log-card {
+    border-radius: 22px;
+  }
+
+  .hero-banner {
+    gap: 10px;
+    padding: 14px 12px 16px;
+  }
+
+  .hero-title {
+    margin-top: 8px;
+    font-size: 28px;
+    letter-spacing: 1px;
+  }
+
+  .hero-subtitle {
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .rule-strip {
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .rule-pill {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+
+  .roster {
+    gap: 16px;
+    margin-top: 18px;
+  }
+
+  .mini-stage {
+    height: 188px;
+    margin: -4px -4px 10px;
+    border-radius: 20px;
+  }
+
+  .roster-name {
+    font-size: 28px;
+  }
+
+  .roster-title,
+  .roster-tagline,
+  .roster-quote,
+  .catalog-desc,
+  .catalog-flavor,
+  .fighter-title,
+  .sheet-line,
+  .result-desc,
+  .log-text,
+  .busy-strip {
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .special-card {
+    margin-top: 12px;
+    padding: 14px 16px;
+  }
+
+  .catalog-title,
+  .action-title,
+  .log-head {
+    font-size: 20px;
+  }
+
+  .catalog-list {
+    gap: 12px;
+  }
+
+  .catalog-card,
+  .card-btn {
+    min-height: 102px;
+    gap: 12px;
+    padding: 14px 12px;
+    border-radius: 18px;
+  }
+
+  .catalog-icon,
+  .skill-icon {
+    font-size: 30px;
+  }
+
+  .battle-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-top: 0;
+  }
+
+  .battle-headline {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .battle-header-side {
+    width: auto;
+    justify-content: flex-end;
+    margin-top: 0;
+    gap: 6px;
+    flex: 0 0 auto;
+  }
+
+  .battle-title {
+    font-size: 18px;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+
+  .battle-subtitle {
+    margin-top: 0;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .sound-btn,
+  .round-lamp {
+    min-height: 28px;
+    padding: 0 9px;
+    font-size: 11px;
+  }
+
+  .banner-board {
+    margin-top: 6px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    font-size: 11px;
+    line-height: 1.35;
+  }
+
+  .arena {
+    margin-top: 8px;
+    padding: 10px 8px 12px;
+    min-height: 432px;
+  }
+
+  .noren {
+    width: 42px;
+    height: 58px;
+  }
+
+  .fighters-row {
+    grid-template-columns: minmax(0, 1fr) 110px minmax(0, 1fr);
+    gap: 6px;
+    align-items: end;
+  }
+
+  .meter-card {
+    padding: 8px 8px 10px;
+    min-height: 84px;
+    border-radius: 12px;
+  }
+
+  .meter-name {
+    font-size: 11px;
+    min-height: 14px;
+  }
+
+  .meter-num,
+  .meter-label {
+    font-size: 9px;
+  }
+
+  .meter-num {
+    min-width: 34px;
+  }
+
+  .meter-track {
+    margin-top: 5px;
+    height: 10px;
+  }
+
+  .stage-box {
+    height: 134px;
+    padding-top: 30px;
+  }
+
+  .center-board {
+    order: 0;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .sake-bottle {
+    width: 110px;
+    padding: 18px 8px 12px;
+    border-radius: 22px 22px 12px 12px;
+  }
+
+  .round-sheet {
+    width: 124px;
+    padding: 8px 7px;
+    border-radius: 12px;
+  }
+
+  .status-row {
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .status-chip {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .action-board,
+  .result-panel,
+  .log-card,
+  .catalog-board {
+    margin-top: 16px;
+  }
+
+  .hand-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .card-btn {
+    min-height: 126px;
+    align-items: flex-start;
+  }
+
+  .skill-copy {
+    gap: 8px;
+  }
+
+  .skill-name {
+    font-size: 16px;
+  }
+
+  .sheet-line,
+  .sake-summary {
+    font-size: 8px;
+    line-height: 1.28;
+    white-space: nowrap;
+    letter-spacing: -0.2px;
+  }
+
+  .fighter-title {
+    margin-top: 4px;
+    font-size: 11px;
+    text-align: center;
+  }
+
+  .fighter-panel {
+    min-width: 0;
+  }
+
+  .meter-top {
+    gap: 6px;
+  }
+
+  .meter-name {
+    font-size: 14px;
+  }
+
+  .meter-track {
+    margin-top: 6px;
+  }
+
+  .avatar {
+    width: 84px;
+    height: 110px;
+  }
+
+  .avatar-shadow {
+    width: 56px;
+    height: 10px;
+  }
+
+  .avatar-body {
+    bottom: 14px;
+    width: 50px;
+    height: 58px;
+    border-radius: 16px 16px 18px 18px;
+  }
+
+  .avatar-body-detail {
+    bottom: 32px;
+    width: 40px;
+    height: 18px;
+  }
+
+  .avatar-jacket {
+    bottom: 36px;
+    width: 16px;
+    height: 34px;
+  }
+
+  .avatar-jacket.left {
+    left: 24px;
+  }
+
+  .avatar-jacket.right {
+    right: 24px;
+  }
+
+  .avatar-collar {
+    bottom: 52px;
+    width: 10px;
+    height: 10px;
+  }
+
+  .avatar-collar.left {
+    left: 32px;
+  }
+
+  .avatar-collar.right {
+    right: 32px;
+  }
+
+  .avatar-tie {
+    bottom: 34px;
+    width: 6px;
+    height: 18px;
+  }
+
+  .avatar-badge {
+    bottom: 36px;
+    width: 9px;
+    height: 9px;
+  }
+
+  .avatar-sash {
+    bottom: 38px;
+    width: 42px;
+    height: 8px;
+  }
+
+  .avatar-arm {
+    bottom: 34px;
+    width: 12px;
+    height: 42px;
+  }
+
+  .avatar-arm.left {
+    left: 6px;
+  }
+
+  .avatar-arm.right {
+    right: 6px;
+  }
+
+  .avatar-prop.main {
+    bottom: 30px;
+    right: -2px;
+    width: 24px;
+    height: 34px;
+  }
+
+  .avatar-head {
+    bottom: 54px;
+    width: 42px;
+    height: 46px;
+  }
+
+  .avatar-hair {
+    left: 4px;
+    right: 4px;
+    height: 16px;
+  }
+
+  .avatar-brow {
+    top: 16px;
+    width: 10px;
+    height: 3px;
+  }
+
+  .avatar-brow.left,
+  .avatar-eye.left,
+  .avatar-cheek.left {
+    left: 8px;
+  }
+
+  .avatar-brow.right,
+  .avatar-eye.right,
+  .avatar-cheek.right {
+    right: 8px;
+  }
+
+  .avatar-eye {
+    top: 22px;
+    width: 6px;
+    height: 6px;
+  }
+
+  .avatar-cheek {
+    top: 28px;
+    width: 8px;
+    height: 5px;
+  }
+
+  .avatar-mouth {
+    bottom: 7px;
+    width: 12px;
+    height: 5px;
+  }
+
+  .avatar-zhongju .avatar-badge {
+    left: 50px;
+  }
+
+  .avatar-zhongju .avatar-prop.main,
+  .avatar-bingwang .avatar-prop.main,
+  .avatar-yueyueniao .avatar-prop.main {
+    width: 24px;
+    height: 36px;
+    bottom: 30px;
+  }
+
+  .avatar-yueyueniao .avatar-prop.alt {
+    left: 0;
+    bottom: 40px;
+    width: 24px;
+    height: 16px;
+  }
+
+  .special-callout {
+    margin-top: 8px;
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .special-action-box {
+    flex: 1;
+  }
+
+  .special-callout-name {
+    font-size: 17px;
+  }
+
+  .special-callout-desc {
+    font-size: 13px;
+  }
+
+  .special-btn,
+  .restart-btn,
+  .back-btn,
+  .pick-btn {
+    min-height: 38px;
+    font-size: 14px;
+  }
+
+  .result-title {
+    font-size: 22px;
+  }
+
+  .lamp-left {
+    left: 74px;
+  }
+
+  .lamp-right {
+    right: 74px;
+  }
+
+  .table-left {
+    left: 38px;
+  }
+
+  .table-right {
+    right: 38px;
+  }
+
+  .guest-left {
+    left: 54px;
+  }
+
+  .guest-right {
+    right: 54px;
+  }
+
+  .sticker-left {
+    left: 104px;
+  }
+
+  .sticker-right {
+    right: 104px;
+  }
+
+  .action-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .special-btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .special-float {
+    top: 88px;
+    min-width: 0;
+    max-width: 78%;
+    padding: 8px 10px 10px;
+    border-radius: 14px;
+  }
+
+  .special-float-badge {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+
+  .special-float-text {
+    margin-top: 6px;
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .roster-card,
+  .catalog-board,
+  .banner-board,
+  .arena,
+  .action-board,
+  .result-panel,
+  .log-card {
+    padding: 12px;
+  }
+}
+</style>
 </head>
 <body>
   <div class="page-shell">
     <div class="paper-bg"></div>
-
     <div class="lantern-row" aria-hidden="true">
       <div class="lantern"><div class="lantern-string"></div><div class="lantern-tail"></div></div>
       <div class="lantern"><div class="lantern-string"></div><div class="lantern-tail"></div></div>
       <div class="lantern"><div class="lantern-string"></div><div class="lantern-tail"></div></div>
       <div class="lantern"><div class="lantern-string"></div><div class="lantern-tail"></div></div>
     </div>
-
     <main id="app"></main>
   </div>
+<script>
+const MAX_DRUNK = 100;
+const BASE_DRUNK_PER_CUP = 8;
+const HAND_SIZE = 3;
+const LOG_LIMIT = 18;
 
-  <script src="./app.js?v=20260621c"></script>
+const CARD_POOL = [
+  { id: "dice_duel", name: "摇骰子", icon: "🎲", tone: "gold", desc: "双方同时摇骰子，点数小的一方当场喝 1 杯。", flavor: "先把运气摇出来，再看谁真要接这一口。", kind: "chaos", rarity: "common", weight: 0.92 },
+  { id: "pretend_drunk", name: "装醉", icon: "😴", tone: "plum", desc: "下回合无视对方让你喝的酒。", flavor: "趴桌三秒，酒桌系统临时查无此人。", kind: "defense", rarity: "common", weight: 1 },
+  { id: "flatter", name: "奉承", icon: "🙇", tone: "amber", desc: "让对方本回合多喝 1 杯。", flavor: "这话一说出口，对面不喝都像不给面子。", kind: "attack", rarity: "common", weight: 1 },
+  { id: "throat_purge", name: "捅喉咙", icon: "🤮", tone: "rare-gag", desc: "吐掉上回合喝的酒，上回合酒醉度不算。", flavor: "趁人没注意，扶着墙根一阵操作，上一轮白喝了。", kind: "recovery", rarity: "rare", weight: 0.2 },
+  { id: "raise_fish", name: "养鱼", icon: "🐟", tone: "teal", desc: "本回合你喝的酒只按 75% 酒醉度结算。", flavor: "酒杯里讲究一个缓慢游泳，绝不一口到底。", kind: "defense", rarity: "common", weight: 1 },
+  { id: "water_as_wine", name: "指水为酒", icon: "💧", tone: "rare-water", desc: "本回合你喝的酒不产生酒醉度。", flavor: "睁眼说瞎话，杯里全是正经自来水。", kind: "defense", rarity: "rare", weight: 0.22 },
+  { id: "red_bull", name: "喝红牛", icon: "🥤", tone: "rare-bull", desc: "立刻增加 1 次绝活使用机会。", flavor: "先把精神顶上来，今晚还能再来一手绝活。", kind: "boost", rarity: "rare", weight: 0.24 },
+  { id: "snack_guard", name: "下酒菜", icon: "🍢", tone: "gold", desc: "立刻降低 12 点酒醉度。", flavor: "一口关东煮下去，灵魂都坐直了。", kind: "recovery", rarity: "common", weight: 1 },
+  { id: "drink_together", name: "共饮", icon: "🍻", tone: "amber", desc: "双方同时喝 3 杯。", flavor: "杯子一撞，谁也别想独善其身。", kind: "chaos", rarity: "common", weight: 0.9 },
+  { id: "pass_the_cup", name: "甩锅", icon: "🥴", tone: "brick", desc: "你少喝默认那 1 杯，对手替你喝 1 杯。", flavor: "逻辑不重要，重要的是把杯子推过去。", kind: "trick", rarity: "common", weight: 1 },
+  { id: "counter_toast", name: "反手敬酒", icon: "🍶", tone: "ink", desc: "若对方本回合让你喝酒，挡回 1 杯给对方。", flavor: "这杯我敬回去，主打一个礼尚往来。", kind: "trick", rarity: "common", weight: 1 }
+];
+
+const CHARACTER_DEFS = {
+  zhongju: {
+    id: "zhongju",
+    shortLabel: "权",
+    name: "钟局",
+    title: "官腔一开，酒杯自动排队",
+    tagline: "居酒屋规则制定者",
+    quote: "这杯不算罚酒，算工作交流。",
+    special: { id: "authority", name: "权力", icon: "📣", desc: "本回合强迫对手多喝 2 杯。", flavor: "一拍桌子，酒桌空气都开始写报告。" }
+  },
+  bingwang: {
+    id: "bingwang",
+    shortLabel: "兵",
+    name: "兵王",
+    title: "站得像标枪，喝得像开挂",
+    tagline: "军旅硬汉型拼酒王",
+    quote: "报告，杯子可以空，气势不能垮。",
+    special: { id: "wine_god", name: "酒神附体", icon: "🔥", desc: "从本回合起连续 3 回合，你的酒醉度结算减半。", flavor: "眼神一变，连酒精都想立正敬礼。" }
+  },
+  yueyueniao: {
+    id: "yueyueniao",
+    shortLabel: "鸟",
+    name: "月月鸟哥",
+    title: "嘴上社牛，脚下逃酒路线专家",
+    tagline: "表情包型社交达人",
+    quote: "先别敬，我去个洗手间回来再讲段子。",
+    special: { id: "toilet_break", name: "上厕所", icon: "🏃", desc: "下个回合你喝的酒不产生酒醉度。", flavor: "转身就跑，回头还要假装真有急事。" }
+  }
+};
+
+const ENEMY_STAGE_DEFS = [
+  {
+    id: "yanchang_changzhang",
+    shortLabel: "烟",
+    name: "烟厂厂长",
+    title: "一手夹烟，一手劝酒，开口就带呛味",
+    tagline: "第一关，烟雾里先练胆",
+    quote: "先别养鱼，先把这口辛辣的规矩咽下去。",
+    special: { id: "smoke_pressure", name: "呛烟劝杯", icon: "🚬", desc: "本回合强迫你多喝 1 杯，并让你本回合酒醉度提高 20%。", flavor: "烟一弹，话一压，杯子就往你手里靠。" },
+    aiTier: 1
+  },
+  {
+    id: "ma_zong",
+    shortLabel: "马",
+    name: "马总",
+    title: "墨镜一戴，杯路全开，敬酒像签合同",
+    tagline: "第二关，气场开始收税",
+    quote: "这杯不是酒，是诚意；你不干，就是流程没走完。",
+    special: { id: "boss_contract", name: "老板加码", icon: "🕶️", desc: "本回合你额外喝 2 杯，马总自己这回合酒醉度只按 50% 结算。", flavor: "墨镜一推，条件一开，你就知道今天不是来聊天的。" },
+    aiTier: 2
+  },
+  {
+    id: "yuwen_laoshi",
+    shortLabel: "文",
+    name: "语文老师",
+    title: "胖乎乎一拍桌，修辞和酒杯一起压过来",
+    tagline: "第三关，嘴上功夫就是终局压力",
+    quote: "这杯你要从修辞、语气、中心思想三个层面认真喝。",
+    special: { id: "full_marks_recite", name: "全文背诵", icon: "📚", desc: "你本回合额外喝 2 杯，且下回合再被额外灌 1 杯。", flavor: "他一脸浮夸地抬手点名，酒桌瞬间变成公开课。" },
+    aiTier: 3
+  }
+];
+
+const uiState = {
+  screen: "select",
+  gameState: null,
+  busy: false,
+  busyText: "",
+  audioEnabled: false,
+  campaignStage: 0
+};
+
+let audioContextRef = null;
+let musicIntervalRef = null;
+let musicStepRef = 0;
+
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function randomFromList(list) {
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+function shuffle(list) {
+  const next = list.slice();
+  for (let i = next.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [next[i], next[j]] = [next[j], next[i]];
+  }
+  return next;
+}
+
+function drawWeightedCards(pool, count) {
+  const source = pool.map((card) => clone(card));
+  const picked = [];
+  while (source.length && picked.length < count) {
+    const totalWeight = source.reduce((sum, card) => sum + (card.weight || 1), 0);
+    let hit = Math.random() * totalWeight;
+    let pickIndex = 0;
+    for (let i = 0; i < source.length; i += 1) {
+      hit -= source[i].weight || 1;
+      if (hit <= 0) {
+        pickIndex = i;
+        break;
+      }
+    }
+    picked.push(source.splice(pickIndex, 1)[0]);
+  }
+  return picked;
+}
+
+function drawCards(count) {
+  return drawWeightedCards(CARD_POOL, count);
+}
+
+function createLog(text, round, id) {
+  return { id, round, text };
+}
+
+function pushLog(state, text, round) {
+  state.logSeq += 1;
+  state.logs.push(createLog(text, round, state.logSeq));
+  if (state.logs.length > LOG_LIMIT) {
+    state.logs = state.logs.slice(state.logs.length - LOG_LIMIT);
+  }
+}
+
+function buildFighter(characterId, side) {
+  const source = clone(CHARACTER_DEFS[characterId] || ENEMY_STAGE_DEFS.find((item) => item.id === characterId));
+  return {
+    id: source.id,
+    side,
+    shortLabel: source.shortLabel,
+    name: source.name,
+    title: source.title,
+    tagline: source.tagline,
+    quote: source.quote,
+    drunkness: 0,
+    maxDrunkness: MAX_DRUNK,
+    pose: "idle",
+    poseLabel: "",
+    statusText: "状态稳定",
+    tags: [],
+    avatarClass: "",
+    drunkPercent: 0,
+    fillClass: "",
+    specialButtonClass: "",
+    specialButtonText: "",
+    special: {
+      id: source.special.id,
+      name: source.special.name,
+      icon: source.special.icon,
+      desc: source.special.desc,
+      flavor: source.special.flavor,
+      usesLeft: 1
+    },
+    aiTier: source.aiTier || 0,
+    status: {
+      ignoreForcedNextRound: false,
+      halfEffectRounds: 0,
+      zeroNextRound: false,
+      lastRoundGain: 0,
+      nextRoundExtraForced: 0
+    }
+  };
+}
+
+function createSelectionRoster() {
+  return Object.keys(CHARACTER_DEFS).map((id) => {
+    const item = CHARACTER_DEFS[id];
+    return {
+      id: item.id,
+      shortLabel: item.shortLabel,
+      name: item.name,
+      title: item.title,
+      tagline: item.tagline,
+      quote: item.quote,
+      special: clone(item.special),
+      rosterClass: `avatar-${item.id} pose-idle tipsy-fresh`
+    };
+  });
+}
+
+function createCardLibrary() {
+  return CARD_POOL.map((card) => clone(card));
+}
+
+function getAudioContext() {
+  if (!audioContextRef) {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return null;
+    audioContextRef = new AudioCtx();
+  }
+  return audioContextRef;
+}
+
+async function ensureAudioReady() {
+  const ctx = getAudioContext();
+  if (!ctx) return null;
+  if (ctx.state === "suspended") {
+    await ctx.resume();
+  }
+  return ctx;
+}
+
+function playTone(ctx, frequency, duration, options = {}) {
+  const oscillator = ctx.createOscillator();
+  const gain = ctx.createGain();
+  oscillator.type = options.type || "sine";
+  oscillator.frequency.setValueAtTime(frequency, ctx.currentTime);
+  gain.gain.setValueAtTime(options.volume || 0.05, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+  oscillator.connect(gain);
+  gain.connect(ctx.destination);
+  oscillator.start(ctx.currentTime);
+  oscillator.stop(ctx.currentTime + duration);
+}
+
+function playNoiseBurst(ctx, duration = 0.12, volume = 0.025) {
+  const buffer = ctx.createBuffer(1, Math.floor(ctx.sampleRate * duration), ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < data.length; i += 1) {
+    data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+  }
+  const noise = ctx.createBufferSource();
+  const gain = ctx.createGain();
+  noise.buffer = buffer;
+  gain.gain.setValueAtTime(volume, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+  noise.connect(gain);
+  gain.connect(ctx.destination);
+  noise.start(ctx.currentTime);
+}
+
+function playGulp(ctx, cups = 1, startOffset = 0) {
+  const swallows = Math.max(1, Math.min(4, cups));
+  for (let i = 0; i < swallows; i += 1) {
+    const at = ctx.currentTime + startOffset + i * 0.13;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(220, at);
+    osc.frequency.exponentialRampToValueAtTime(150, at + 0.11);
+    gain.gain.setValueAtTime(0.0001, at);
+    gain.gain.exponentialRampToValueAtTime(0.05, at + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.12);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(at);
+    osc.stop(at + 0.12);
+  }
+}
+
+function playCupClink(ctx, startOffset = 0) {
+  playTone(ctx, 1280, 0.05, { type: "triangle", volume: 0.018 });
+  playTone(ctx, 1760, 0.04, { type: "sine", volume: 0.012 });
+  playNoiseBurst(ctx, 0.03, 0.008 + startOffset * 0);
+}
+
+function playShoutHe(ctx, startOffset = 0) {
+  const at = ctx.currentTime + startOffset;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = "sawtooth";
+  osc.frequency.setValueAtTime(520, at);
+  osc.frequency.exponentialRampToValueAtTime(280, at + 0.16);
+  gain.gain.setValueAtTime(0.0001, at);
+  gain.gain.exponentialRampToValueAtTime(0.028, at + 0.018);
+  gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.18);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(at);
+  osc.stop(at + 0.18);
+}
+
+function startMusicLoop() {
+  const ctx = getAudioContext();
+  if (!ctx || musicIntervalRef) return;
+  const notes = [261.63, 329.63, 392.0, 329.63, 293.66, 349.23, 392.0, 440.0];
+  musicStepRef = 0;
+  musicIntervalRef = window.setInterval(() => {
+    if (!uiState.audioEnabled) return;
+    const base = notes[musicStepRef % notes.length];
+    playTone(ctx, base, 0.28, { type: "triangle", volume: 0.028 });
+    playTone(ctx, base / 2, 0.34, { type: "sine", volume: 0.016 });
+    if (musicStepRef % 2 === 0) {
+      playNoiseBurst(ctx, 0.06, 0.012);
+    }
+    musicStepRef += 1;
+  }, 420);
+}
+
+function stopMusicLoop() {
+  if (musicIntervalRef) {
+    window.clearInterval(musicIntervalRef);
+    musicIntervalRef = null;
+  }
+}
+
+async function setAudioEnabled(enabled) {
+  uiState.audioEnabled = enabled;
+  const ctx = await ensureAudioReady();
+  if (!ctx) {
+    uiState.audioEnabled = false;
+    render();
+    return;
+  }
+  if (enabled) {
+    startMusicLoop();
+    playTone(ctx, 523.25, 0.2, { type: "triangle", volume: 0.06 });
+    playTone(ctx, 659.25, 0.24, { type: "triangle", volume: 0.045 });
+  } else {
+    stopMusicLoop();
+  }
+  render();
+}
+
+async function toggleAudio() {
+  await setAudioEnabled(!uiState.audioEnabled);
+}
+
+async function playSfx(kind) {
+  if (!uiState.audioEnabled) return;
+  const ctx = await ensureAudioReady();
+  if (!ctx) return;
+  if (kind === "card") {
+    playTone(ctx, 620, 0.12, { type: "square", volume: 0.035 });
+    playTone(ctx, 860, 0.08, { type: "triangle", volume: 0.02 });
+  } else if (kind === "special") {
+    playTone(ctx, 392, 0.22, { type: "sawtooth", volume: 0.05 });
+    playTone(ctx, 523.25, 0.28, { type: "triangle", volume: 0.03 });
+  } else if (kind === "select") {
+    playTone(ctx, 392, 0.18, { type: "triangle", volume: 0.04 });
+    playTone(ctx, 493.88, 0.2, { type: "triangle", volume: 0.032 });
+  } else if (kind === "win") {
+    playTone(ctx, 523.25, 0.2, { type: "triangle", volume: 0.055 });
+    playTone(ctx, 659.25, 0.25, { type: "triangle", volume: 0.045 });
+    playTone(ctx, 783.99, 0.32, { type: "triangle", volume: 0.04 });
+  } else if (kind === "lose") {
+    playTone(ctx, 330, 0.22, { type: "sine", volume: 0.045 });
+    playTone(ctx, 246.94, 0.3, { type: "sine", volume: 0.035 });
+  } else if (kind === "drink") {
+    playGulp(ctx, 2, 0);
+    playShoutHe(ctx, 0.04);
+  } else if (kind === "drink-heavy") {
+    playCupClink(ctx, 0);
+    playGulp(ctx, 4, 0.03);
+    playShoutHe(ctx, 0.02);
+  } else if (kind === "boost") {
+    playTone(ctx, 440, 0.12, { type: "square", volume: 0.03 });
+    playTone(ctx, 554.37, 0.14, { type: "triangle", volume: 0.026 });
+    playTone(ctx, 659.25, 0.18, { type: "triangle", volume: 0.024 });
+  } else if (kind === "recovery") {
+    playTone(ctx, 392, 0.12, { type: "sine", volume: 0.025 });
+    playTone(ctx, 523.25, 0.16, { type: "triangle", volume: 0.02 });
+  }
+}
+
+function createBattle(playerId, stageIndex = uiState.campaignStage || 0) {
+  const enemyDef = ENEMY_STAGE_DEFS[Math.min(stageIndex, ENEMY_STAGE_DEFS.length - 1)];
+  const state = {
+    stage: "battle",
+    battleMode: "campaign",
+    campaignStage: Math.min(stageIndex, ENEMY_STAGE_DEFS.length - 1),
+    round: 1,
+    player: buildFighter(playerId, "player"),
+    enemy: buildFighter(enemyDef.id, "enemy"),
+    playerHand: drawCards(HAND_SIZE),
+    enemyHand: drawCards(HAND_SIZE),
+    logs: [],
+    logSeq: 0,
+    roundBanner: "",
+    lastRound: {
+      summary: "纸灯笼刚亮起来，第一轮先碰杯再斗法。",
+      playerActionText: "你还没出牌",
+      enemyActionText: "对面还在抖包袱",
+      playerCupText: "0 杯 / +0",
+      enemyCupText: "0 杯 / +0"
+    },
+    result: null
+  };
+  pushLog(state, `${state.player.name}推门进店，今夜对手是${state.enemy.name}。`, 0);
+  pushLog(state, "老板把酒盅一摆：每回合双方默认都得先喝 1 杯。", 0);
+  state.roundBanner = `第 ${state.campaignStage + 1} 关 ${state.enemy.name}已经坐下，灯笼一晃，第一回合开喝。`;
+  return decorateState(state);
+}
+
+function chooseEnemyAction(state) {
+  const actor = state.enemy;
+  const target = state.player;
+
+  if (actor.special.usesLeft > 0) {
+    if (actor.id === "zhongju" && !target.status.ignoreForcedNextRound && (target.drunkness >= 52 || state.round >= 3)) {
+      return { type: "special" };
+    }
+    if (actor.id === "bingwang" && actor.drunkness >= 36) {
+      return { type: "special" };
+    }
+    if (actor.id === "yueyueniao" && actor.drunkness >= 50) {
+      return { type: "special" };
+    }
+    if (actor.id === "yanchang_changzhang" && (state.round >= 2 || target.drunkness >= 24)) {
+      return { type: "special" };
+    }
+    if (actor.id === "ma_zong" && (state.round >= 2 || target.drunkness >= 34)) {
+      return { type: "special" };
+    }
+    if (actor.id === "yuwen_laoshi" && (state.round >= 2 || target.drunkness >= 40)) {
+      return { type: "special" };
+    }
+  }
+
+  let bestScore = -9999;
+  let bestIndex = 0;
+  state.enemyHand.forEach((card, index) => {
+    let score = Math.random() * 1.5;
+    const targetShieldActive = !!target.status.ignoreForcedNextRound;
+
+    switch (card.id) {
+      case "pretend_drunk":
+        score += actor.drunkness >= 48 ? 13 : 4;
+        break;
+      case "flatter":
+        score += targetShieldActive ? 1 : 16 + target.drunkness / 8;
+        break;
+      case "throat_purge":
+        score += actor.status.lastRoundGain > 0 ? 13 + actor.status.lastRoundGain * 0.2 : 2;
+        break;
+      case "raise_fish":
+        score += actor.drunkness >= 32 ? 10 : 4;
+        break;
+      case "water_as_wine":
+        score += actor.drunkness >= 56 ? 18 : 7;
+        break;
+      case "red_bull":
+        score += actor.special.usesLeft <= 0 ? 18 : 8;
+        score += actor.drunkness >= 42 ? 5 : 0;
+        break;
+      case "snack_guard":
+        score += actor.drunkness >= 54 ? 17 : 5;
+        break;
+      case "drink_together":
+        score += target.drunkness > actor.drunkness ? 15 : 4;
+        score += target.drunkness >= 68 ? 7 : 0;
+        score -= actor.drunkness >= 74 ? 8 : 0;
+        break;
+      case "pass_the_cup":
+        score += targetShieldActive ? 2 : 12 + actor.drunkness / 12;
+        break;
+      case "counter_toast":
+        score += target.id === "zhongju" ? 14 : 8;
+        score += target.drunkness > actor.drunkness ? 3 : 0;
+        break;
+      default:
+        score += 1;
+    }
+
+    if (actor.aiTier === 1) {
+      if (card.id === "flatter") score += 3;
+      if (card.id === "drink_together" && actor.drunkness >= 50) score -= 5;
+    } else if (actor.aiTier === 2) {
+      if (card.id === "flatter") score += 5;
+      if (card.id === "water_as_wine") score += 4;
+      if (card.id === "drink_together" && target.drunkness >= actor.drunkness + 10) score += 5;
+    } else if (actor.aiTier >= 3) {
+      if (card.id === "flatter") score += 7;
+      if (card.id === "pass_the_cup") score += 4;
+      if (card.id === "counter_toast") score += 5;
+      if (card.id === "drink_together" && actor.drunkness >= 58) score -= 8;
+      if (card.id === "throat_purge" && actor.status.lastRoundGain > 0) score += 6;
+    }
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestIndex = index;
+    }
+  });
+
+  return { type: "card", cardIndex: bestIndex };
+}
+
+function createRoundContext(fighter) {
+  return {
+    baseCups: 1,
+    forcedByOpponent: 0,
+    effectMultiplier: 1,
+    zeroDrunk: false,
+    relief: 0,
+    undoLastGain: false,
+    returnOneForced: false,
+    ignoreForcedThisRound: !!fighter.status.ignoreForcedNextRound,
+    setIgnoreForcedNextRound: false,
+    setZeroNextRound: false,
+    persistHalfRounds: 0,
+    extraSpecialUse: 0,
+    diceCall: false,
+    pose: "idle",
+    poseLabel: ""
+  };
+}
+
+function buildActionFromChoice(state, side, choice) {
+  const fighter = side === "player" ? state.player : state.enemy;
+  const hand = side === "player" ? state.playerHand : state.enemyHand;
+
+  if (choice.type === "special") {
+    return {
+      type: "special",
+      id: fighter.special.id,
+      name: fighter.special.name,
+      icon: fighter.special.icon,
+      desc: fighter.special.desc,
+      flavor: fighter.special.flavor
+    };
+  }
+
+  const safeIndex = typeof choice.cardIndex === "number" ? choice.cardIndex : 0;
+  return clone(hand[safeIndex] || hand[0]);
+}
+
+function applyAction(actor, target, action, selfRound, targetRound, state, roundNumber) {
+  pushLog(state, `${actor.name}亮出${action.type === "special" ? "绝活" : "技能卡"}【${action.name}】。`, roundNumber);
+
+  switch (action.id) {
+    case "pretend_drunk":
+      selfRound.setIgnoreForcedNextRound = true;
+      selfRound.pose = "nap";
+      selfRound.poseLabel = "ZZZ";
+      pushLog(state, `${actor.name}啪地趴桌，先把下回合的灌酒额度躲起来。`, roundNumber);
+      break;
+    case "flatter":
+      targetRound.forcedByOpponent += 1;
+      selfRound.pose = "toast";
+      selfRound.poseLabel = "敬";
+      pushLog(state, `${actor.name}一顿猛夸，把${target.name}夸得多喝 1 杯。`, roundNumber);
+      break;
+    case "throat_purge":
+      selfRound.undoLastGain = true;
+      selfRound.pose = "sick";
+      selfRound.poseLabel = "吐";
+      pushLog(state, `${actor.name}使出【捅喉咙】，硬把上回合那口酒给吐没了。`, roundNumber);
+      break;
+    case "dice_duel":
+      selfRound.diceCall = true;
+      selfRound.pose = "snap";
+      selfRound.poseLabel = "骰";
+      pushLog(state, `${actor.name}把骰子往桌中一掷，要和${target.name}当场比点数。`, roundNumber);
+      break;
+    case "raise_fish":
+      selfRound.effectMultiplier *= 0.75;
+      selfRound.pose = "fish";
+      selfRound.poseLabel = "鱼";
+      pushLog(state, `${actor.name}开启养鱼模式，这回合只吃 75% 酒劲。`, roundNumber);
+      break;
+    case "water_as_wine":
+      selfRound.zeroDrunk = true;
+      selfRound.pose = "smirk";
+      selfRound.poseLabel = "水";
+      pushLog(state, `${actor.name}一本正经指水为酒，这回合酒醉度清零结算。`, roundNumber);
+      break;
+    case "red_bull":
+      selfRound.extraSpecialUse += 1;
+      selfRound.pose = "god";
+      selfRound.poseLabel = "牛";
+      pushLog(state, `${actor.name}吨吨灌下红牛，硬是给自己续了 1 次绝活机会。`, roundNumber);
+      break;
+    case "snack_guard":
+      selfRound.relief += 12;
+      selfRound.pose = "eat";
+      selfRound.poseLabel = "串";
+      pushLog(state, `${actor.name}抓起下酒菜猛炫，立刻回落 12 点酒醉度。`, roundNumber);
+      break;
+    case "drink_together":
+      selfRound.baseCups += 2;
+      targetRound.baseCups += 2;
+      selfRound.pose = "toast";
+      selfRound.poseLabel = "共饮";
+      pushLog(state, `${actor.name}拉着${target.name}共饮，这回合双方都各自多喝 3 杯。`, roundNumber);
+      break;
+    case "pass_the_cup":
+      selfRound.baseCups = Math.max(0, selfRound.baseCups - 1);
+      targetRound.forcedByOpponent += 1;
+      selfRound.pose = "shrug";
+      selfRound.poseLabel = "甩";
+      pushLog(state, `${actor.name}把默认那杯顺手甩锅给了${target.name}。`, roundNumber);
+      break;
+    case "counter_toast":
+      selfRound.returnOneForced = true;
+      selfRound.pose = "snap";
+      selfRound.poseLabel = "敬回";
+      pushLog(state, `${actor.name}把酒盅捏在手里，准备反手敬回去。`, roundNumber);
+      break;
+    case "authority":
+      targetRound.forcedByOpponent += 2;
+      selfRound.pose = "command";
+      selfRound.poseLabel = "压";
+      pushLog(state, `${actor.name}发动绝活【权力】，强行加码 2 杯。`, roundNumber);
+      break;
+    case "wine_god":
+      selfRound.effectMultiplier *= 0.5;
+      selfRound.persistHalfRounds = 2;
+      selfRound.pose = "god";
+      selfRound.poseLabel = "神";
+      pushLog(state, `${actor.name}发动绝活【酒神附体】，从本回合起连续 3 回合酒劲减半。`, roundNumber);
+      break;
+    case "toilet_break":
+      selfRound.setZeroNextRound = true;
+      selfRound.pose = "run";
+      selfRound.poseLabel = "WC";
+      pushLog(state, `${actor.name}发动绝活【上厕所】，先把下回合整成免醉档。`, roundNumber);
+      break;
+    case "smoke_pressure":
+      targetRound.forcedByOpponent += 1;
+      targetRound.effectMultiplier *= 1.2;
+      selfRound.pose = "smirk";
+      selfRound.poseLabel = "烟";
+      pushLog(state, `${actor.name}吐着烟圈发动【呛烟劝杯】，硬让${target.name}多喝 1 杯，酒劲还更冲。`, roundNumber);
+      break;
+    case "boss_contract":
+      targetRound.forcedByOpponent += 2;
+      selfRound.effectMultiplier *= 0.5;
+      selfRound.pose = "command";
+      selfRound.poseLabel = "总";
+      pushLog(state, `${actor.name}发动【老板加码】，把合同感都压进酒里，自己却只吃半份酒劲。`, roundNumber);
+      break;
+    case "full_marks_recite":
+      targetRound.forcedByOpponent += 2;
+      target.status.nextRoundExtraForced += 1;
+      selfRound.pose = "command";
+      selfRound.poseLabel = "背";
+      pushLog(state, `${actor.name}发动【全文背诵】，当场点你多喝 2 杯，还把下回合作业也布置上了。`, roundNumber);
+      break;
+    default:
+      break;
+  }
+}
+
+function resolveCounterToasts(player, enemy, playerRound, enemyRound, state, roundNumber) {
+  if (playerRound.returnOneForced && playerRound.forcedByOpponent > 0) {
+    playerRound.forcedByOpponent -= 1;
+    enemyRound.forcedByOpponent += 1;
+    pushLog(state, `${player.name}把 1 杯灌酒反手敬回给了${enemy.name}。`, roundNumber);
+  }
+  if (enemyRound.returnOneForced && enemyRound.forcedByOpponent > 0) {
+    enemyRound.forcedByOpponent -= 1;
+    playerRound.forcedByOpponent += 1;
+    pushLog(state, `${enemy.name}把 1 杯灌酒原路弹回给了${player.name}。`, roundNumber);
+  }
+}
+
+function resolveProtection(fighter, roundCtx, state, roundNumber) {
+  if (roundCtx.ignoreForcedThisRound && roundCtx.forcedByOpponent > 0) {
+    const blocked = roundCtx.forcedByOpponent;
+    roundCtx.forcedByOpponent = 0;
+    pushLog(state, `${fighter.name}的装醉保护生效，躲掉了 ${blocked} 杯灌酒。`, roundNumber);
+  }
+}
+
+function resolveDiceDuel(player, enemy, playerRound, enemyRound, state, roundNumber) {
+  if (!playerRound.diceCall && !enemyRound.diceCall) return null;
+  const playerRoll = Math.floor(Math.random() * 6) + 1;
+  const enemyRoll = Math.floor(Math.random() * 6) + 1;
+  let loser = "draw";
+
+  if (playerRoll < enemyRoll) {
+    playerRound.forcedByOpponent += 1;
+    loser = "player";
+    pushLog(state, `${player.name}摇出 ${playerRoll} 点，${enemy.name}摇出 ${enemyRoll} 点，你点数小，当场多喝 1 杯。`, roundNumber);
+  } else if (enemyRoll < playerRoll) {
+    enemyRound.forcedByOpponent += 1;
+    loser = "enemy";
+    pushLog(state, `${player.name}摇出 ${playerRoll} 点，${enemy.name}摇出 ${enemyRoll} 点，对手点数小，当场多喝 1 杯。`, roundNumber);
+  } else {
+    pushLog(state, `${player.name}和${enemy.name}都摇出 ${playerRoll} 点，这把平手，先算打平。`, roundNumber);
+  }
+
+  return { playerRoll, enemyRoll, loser };
+}
+
+function settlePersistentStatus(fighter, roundCtx) {
+  if (fighter.status.ignoreForcedNextRound) fighter.status.ignoreForcedNextRound = false;
+  if (roundCtx.setIgnoreForcedNextRound) fighter.status.ignoreForcedNextRound = true;
+
+  if (fighter.status.zeroNextRound) fighter.status.zeroNextRound = false;
+  if (roundCtx.setZeroNextRound) fighter.status.zeroNextRound = true;
+
+  if (fighter.status.halfEffectRounds > 0) fighter.status.halfEffectRounds -= 1;
+  if (roundCtx.persistHalfRounds > 0) {
+    fighter.status.halfEffectRounds = Math.max(fighter.status.halfEffectRounds, roundCtx.persistHalfRounds);
+  }
+
+  if (roundCtx.extraSpecialUse > 0) {
+    fighter.special.usesLeft += roundCtx.extraSpecialUse;
+  }
+}
+
+function calculateGain(fighter, roundCtx) {
+  const undone = roundCtx.undoLastGain ? fighter.status.lastRoundGain : 0;
+  const soberBase = clamp(fighter.drunkness - roundCtx.relief - undone, 0, fighter.maxDrunkness);
+  const totalCups = Math.max(0, roundCtx.baseCups + roundCtx.forcedByOpponent);
+  const gain = roundCtx.zeroDrunk ? 0 : Math.round(totalCups * BASE_DRUNK_PER_CUP * roundCtx.effectMultiplier);
+  fighter.drunkness = clamp(soberBase + gain, 0, fighter.maxDrunkness);
+  fighter.pose = roundCtx.pose;
+  fighter.poseLabel = roundCtx.poseLabel;
+  fighter.status.lastRoundGain = gain;
+  return { totalCups, gain, undone };
+}
+
+function buildResult(player, enemy, roundNumber) {
+  if (player.drunkness >= MAX_DRUNK && enemy.drunkness >= MAX_DRUNK) {
+    return { title: "双双趴桌", desc: `第 ${roundNumber} 回合结束后两边一起醉倒，老板已经开始搬电风扇。` };
+  }
+  if (enemy.drunkness >= MAX_DRUNK) {
+    return { title: "你把对面喝趴了", desc: `${enemy.name}在第 ${roundNumber} 回合先到满格酒醉度，你赢下了这桌。` };
+  }
+  return { title: "你先被抬去吹风了", desc: `第 ${roundNumber} 回合结束后你的酒醉度先爆表，老板建议你去门口醒醒酒。` };
+}
+
+function buildRoundBanner(player, enemy) {
+  if (player.drunkness >= MAX_DRUNK || enemy.drunkness >= MAX_DRUNK) return "酒盅已经见底，今晚这桌胜负已分。";
+  if (Math.abs(player.drunkness - enemy.drunkness) <= 10) return "两边都在强撑体面，空气里全是嘴硬。";
+  if (player.drunkness < enemy.drunkness) return `${player.name}明显更稳，${enemy.name}的眼神开始飘了。`;
+  return `${enemy.name}目前更稳，${player.name}正在努力装没事。`;
+}
+
+function getStageIntro(stageIndex) {
+  const stage = ENEMY_STAGE_DEFS[Math.min(stageIndex, ENEMY_STAGE_DEFS.length - 1)];
+  return `第 ${stageIndex + 1} 关开桌：${stage.name}已经端杯坐定。`;
+}
+
+function decorateFighter(fighter) {
+  const tags = [];
+  if (fighter.status.ignoreForcedNextRound) tags.push("下回合免灌");
+  if (fighter.status.halfEffectRounds > 0) tags.push(`酒神剩 ${fighter.status.halfEffectRounds} 回合`);
+  if (fighter.status.zeroNextRound) tags.push("下回合免醉");
+
+  let tipsyClass = "tipsy-fresh";
+  let statusText = "状态稳定";
+  if (fighter.drunkness >= 85) {
+    tipsyClass = "tipsy-ko";
+    statusText = "快趴桌了";
+  } else if (fighter.drunkness >= 60) {
+    tipsyClass = "tipsy-wobble";
+    statusText = "开始打晃";
+  } else if (fighter.drunkness >= 30) {
+    tipsyClass = "tipsy-warm";
+    statusText = "微醺上脸";
+  }
+
+  fighter.drunkPercent = Math.round((fighter.drunkness / fighter.maxDrunkness) * 100);
+  fighter.tags = tags;
+  fighter.statusText = statusText;
+  fighter.avatarClass = `avatar-${fighter.id} pose-${fighter.pose} ${tipsyClass}`;
+  fighter.fillClass = fighter.side === "player" ? "player-fill" : "enemy-fill";
+  fighter.specialButtonClass = fighter.special.usesLeft <= 0 ? "disabled" : "";
+  fighter.specialButtonText = fighter.special.usesLeft <= 0
+    ? "绝活已用完"
+    : `发动绝活：${fighter.special.name}（剩 ${fighter.special.usesLeft} 次）`;
+}
+
+function decorateState(state) {
+  decorateFighter(state.player);
+  decorateFighter(state.enemy);
+  if (state.stage === "result") {
+    const isDraw = state.player.drunkness >= MAX_DRUNK && state.enemy.drunkness >= MAX_DRUNK;
+    if (!isDraw) {
+      const playerWon = state.enemy.drunkness >= MAX_DRUNK;
+      state.player.avatarClass += playerWon ? " result-winner" : " result-loser";
+      state.enemy.avatarClass += playerWon ? " result-loser" : " result-winner";
+      if (playerWon) {
+        state.player.poseLabel = "庆";
+        state.enemy.poseLabel = "晕";
+      } else {
+        state.player.poseLabel = "晕";
+        state.enemy.poseLabel = "庆";
+      }
+    } else {
+      state.player.avatarClass += " result-loser";
+      state.enemy.avatarClass += " result-loser";
+      state.player.poseLabel = "晕";
+      state.enemy.poseLabel = "晕";
+    }
+  }
+  state.roundBanner = state.roundBanner || buildRoundBanner(state.player, state.enemy);
+  return state;
+}
+
+function playRound(prevState, playerChoice) {
+  const state = clone(prevState);
+  const roundNumber = state.round;
+  const enemyChoice = chooseEnemyAction(state);
+  const playerAction = buildActionFromChoice(state, "player", playerChoice);
+  const enemyAction = buildActionFromChoice(state, "enemy", enemyChoice);
+  const playerRound = createRoundContext(state.player);
+  const enemyRound = createRoundContext(state.enemy);
+
+  if (state.player.status.nextRoundExtraForced > 0) {
+    playerRound.forcedByOpponent += state.player.status.nextRoundExtraForced;
+    state.player.status.nextRoundExtraForced = 0;
+  }
+  if (state.enemy.status.nextRoundExtraForced > 0) {
+    enemyRound.forcedByOpponent += state.enemy.status.nextRoundExtraForced;
+    state.enemy.status.nextRoundExtraForced = 0;
+  }
+
+  if (state.player.status.halfEffectRounds > 0) playerRound.effectMultiplier *= 0.5;
+  if (state.enemy.status.halfEffectRounds > 0) enemyRound.effectMultiplier *= 0.5;
+  if (state.player.status.zeroNextRound) playerRound.zeroDrunk = true;
+  if (state.enemy.status.zeroNextRound) enemyRound.zeroDrunk = true;
+  if (playerChoice.type === "special") state.player.special.usesLeft = Math.max(0, state.player.special.usesLeft - 1);
+  if (enemyChoice.type === "special") state.enemy.special.usesLeft = Math.max(0, state.enemy.special.usesLeft - 1);
+
+  const specialNotice = playerAction.type === "special"
+    ? { side: "player", name: state.player.name, skill: playerAction.name, effect: "flame" }
+    : enemyAction.type === "special"
+      ? { side: "enemy", name: state.enemy.name, skill: enemyAction.name, effect: state.enemy.aiTier >= 2 ? "lightning" : "flame" }
+      : null;
+
+  pushLog(state, `第 ${roundNumber} 回合开喝：双方先端起默认那一杯。`, roundNumber);
+  applyAction(state.player, state.enemy, playerAction, playerRound, enemyRound, state, roundNumber);
+  applyAction(state.enemy, state.player, enemyAction, enemyRound, playerRound, state, roundNumber);
+  resolveCounterToasts(state.player, state.enemy, playerRound, enemyRound, state, roundNumber);
+  resolveProtection(state.player, playerRound, state, roundNumber);
+  resolveProtection(state.enemy, enemyRound, state, roundNumber);
+
+  const playerGain = calculateGain(state.player, playerRound);
+  const enemyGain = calculateGain(state.enemy, enemyRound);
+
+  settlePersistentStatus(state.player, playerRound);
+  settlePersistentStatus(state.enemy, enemyRound);
+
+  state.lastRound = {
+    summary: `${state.player.name}使出【${playerAction.name}】，${state.enemy.name}应对【${enemyAction.name}】。`,
+    playerActionText: `你出：${playerAction.name}`,
+    enemyActionText: `对手出：${enemyAction.name}`,
+    playerCupText: `${playerGain.totalCups} 杯 / +${playerGain.gain}${playerGain.undone ? ` / 吐-${playerGain.undone}` : ""}`,
+    enemyCupText: `${enemyGain.totalCups} 杯 / +${enemyGain.gain}${enemyGain.undone ? ` / 吐-${enemyGain.undone}` : ""}`,
+    playerCups: playerGain.totalCups,
+    enemyCups: enemyGain.totalCups,
+    specialNotice
+  };
+
+  pushLog(state, `${state.player.name}本回合喝了 ${playerGain.totalCups} 杯，酒醉度来到 ${state.player.drunkness}。${state.enemy.name}喝了 ${enemyGain.totalCups} 杯，酒醉度来到 ${state.enemy.drunkness}。`, roundNumber);
+
+  if (state.player.drunkness >= MAX_DRUNK || state.enemy.drunkness >= MAX_DRUNK) {
+    state.stage = "result";
+    state.result = buildResult(state.player, state.enemy, roundNumber);
+    if (state.enemy.drunkness >= MAX_DRUNK && state.battleMode === "campaign") {
+      state.result.nextStageUnlocked = state.campaignStage < ENEMY_STAGE_DEFS.length - 1;
+      state.result.isCampaignClear = state.campaignStage >= ENEMY_STAGE_DEFS.length - 1;
+    }
+    state.roundBanner = state.result.desc;
+    pushLog(state, `${state.result.title}。`, roundNumber);
+    return decorateState(state);
+  }
+
+  state.round += 1;
+  state.playerHand = drawCards(HAND_SIZE);
+  state.enemyHand = drawCards(HAND_SIZE);
+  state.roundBanner = buildRoundBanner(state.player, state.enemy);
+  return decorateState(state);
+}
+
+function getBusyText(enemy) {
+  const map = {
+    zhongju: "钟局正在扶眼镜、抖官腔、准备发话……",
+    bingwang: "兵王正在抻肩膀，像是要把酒精训话……",
+    yueyueniao: "月月鸟哥正在左右看路，像在找新借口……"
+  };
+  return map[enemy.id] || "对手正在端杯子组织语言……";
+}
+
+function avatarMarkup(className, poseLabel, mini = false) {
+  return `
+    <div class="avatar ${mini ? "mini " : ""}${className}">
+      <div class="avatar-shadow"></div>
+      <div class="avatar-body"></div>
+      <div class="avatar-body-detail"></div>
+      <div class="avatar-jacket left"></div>
+      <div class="avatar-jacket right"></div>
+      <div class="avatar-collar left"></div>
+      <div class="avatar-collar right"></div>
+      <div class="avatar-tie"></div>
+      <div class="avatar-badge"></div>
+      <div class="avatar-sash"></div>
+      <div class="avatar-arm left"></div>
+      <div class="avatar-arm right"></div>
+      <div class="avatar-prop main"></div>
+      <div class="avatar-prop alt"></div>
+      <div class="avatar-head">
+        <div class="avatar-hair"></div>
+        <div class="avatar-brow left"></div>
+        <div class="avatar-brow right"></div>
+        <div class="avatar-eye left"></div>
+        <div class="avatar-eye right"></div>
+        <div class="avatar-cheek left"></div>
+        <div class="avatar-cheek right"></div>
+        <div class="avatar-mouth"></div>
+      </div>
+      ${poseLabel ? `<div class="pose-sign">${poseLabel}</div>` : ""}
+    </div>
+  `;
+}
+
+function renderSelectScreen() {
+  const roster = createSelectionRoster();
+  const cards = createCardLibrary();
+  return `
+    <section>
+      <div class="hero-banner">
+        <img class="hero-icon" src="./assets/icon-jiuwu-dazhan.png" alt="酒屋大战图标">
+        <div>
+          <div class="hero-chip">居酒屋回合战</div>
+          <div class="hero-title">酒屋大战</div>
+          <div class="hero-subtitle">选一个己方狠人守擂。你要一路挑战烟厂厂长、马总、语文老师三关，越往后越会劝酒。</div>
+          <div class="hero-actions">
+            <button class="sound-btn" data-action="toggle-audio">${uiState.audioEnabled ? "音乐已开" : "点我开音乐"}</button>
+            <span class="audio-pill">${uiState.audioEnabled ? "背景乐 + 音效开启" : "微信里首次点一下即可启用声音"}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="rule-strip">
+        <div class="rule-pill">每回合双方默认喝 1 杯</div>
+        <div class="rule-pill">随机抽 3 张技能卡</div>
+        <div class="rule-pill">角色绝活每局 1 次</div>
+        <div class="rule-pill">三关首领逐关变强</div>
+      </div>
+
+      <div class="roster">
+        ${roster.map((item) => `
+          <article class="roster-card roster-card-${item.id}">
+            <div class="roster-stamp">${item.shortLabel}</div>
+            <div class="mini-stage mini-stage-${item.id}">${avatarMarkup(item.rosterClass, "", true)}</div>
+            <div class="roster-name">${item.name}</div>
+            <div class="roster-title">${item.title}</div>
+            <div class="roster-tagline">${item.tagline}</div>
+            <div class="special-card">
+              <div class="special-name">${item.special.icon} ${item.special.name}</div>
+              <div class="special-desc">${item.special.desc}</div>
+            </div>
+            <div class="roster-quote">“${item.quote}”</div>
+            <button class="pick-btn" data-action="select-character" data-character="${item.id}">选他守擂</button>
+          </article>
+        `).join("")}
+      </div>
+
+      <section class="catalog-board">
+        <div class="catalog-title">酒桌套路册</div>
+        <div class="catalog-list">
+          ${cards.map((card) => `
+            <div class="catalog-card tone-${card.tone}">
+              <div class="catalog-icon">${card.icon}</div>
+              <div>
+                <div class="catalog-name-row">
+                  <div class="catalog-name">${card.name}</div>
+                  ${card.rarity === "rare" ? `<span class="rarity-badge">稀有</span>` : ""}
+                </div>
+                <div class="catalog-desc">${card.desc}</div>
+                <div class="catalog-flavor">${card.flavor}</div>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      </section>
+    </section>
+  `;
+}
+
+function fighterPanelMarkup(fighter) {
+  return `
+    <div class="fighter-panel">
+      <div class="meter-card">
+        <div class="meter-top">
+          <div class="meter-name">${fighter.name}</div>
+          <div class="meter-num">${fighter.drunkness} / ${fighter.maxDrunkness}</div>
+        </div>
+        <div class="meter-label">酒醉度</div>
+        <div class="meter-track"><div class="meter-fill ${fighter.fillClass}" style="width:${fighter.drunkPercent}%"></div></div>
+      </div>
+      <div class="stage-box">${avatarMarkup(fighter.avatarClass, fighter.poseLabel)}</div>
+      <div class="fighter-title">${fighter.title}</div>
+      <div class="status-row">
+        ${(fighter.tags.length ? fighter.tags : [fighter.statusText]).map((tag, index) => `<span class="status-chip ${fighter.tags.length ? "" : "muted"}" key="${index}">${tag}</span>`).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderBattleScreen() {
+  const state = uiState.gameState;
+  const isResult = state.stage === "result";
+  return `
+    <section>
+      <div class="battle-header">
+        <div class="battle-headline">
+          <div class="battle-title">酒屋大战</div>
+          <div class="battle-subtitle">第 ${state.campaignStage + 1} 关 ${state.player.name} VS ${state.enemy.name}</div>
+        </div>
+        <div class="battle-header-side">
+          <button class="sound-btn small" data-action="toggle-audio">${uiState.audioEnabled ? "关音乐" : "开音乐"}</button>
+          <div class="round-lamp">第 ${state.round} 回合</div>
+        </div>
+      </div>
+
+      <div class="banner-board">${state.roundBanner}</div>
+
+      <div class="arena">
+        <div class="noren left"></div>
+        <div class="noren right"></div>
+        <div class="backroom-glow"></div>
+        <div class="backroom-lamp lamp-left"></div>
+        <div class="backroom-lamp lamp-mid"></div>
+        <div class="backroom-lamp lamp-right"></div>
+        <div class="backroom-table table-left"></div>
+        <div class="backroom-table table-mid"></div>
+        <div class="backroom-table table-right"></div>
+        <div class="backroom-guest guest-left"></div>
+        <div class="backroom-guest guest-mid"></div>
+        <div class="backroom-guest guest-right"></div>
+        <div class="izakaya-decor menu-left">今日串烧</div>
+        <div class="izakaya-decor menu-right">清酒热卖</div>
+        <div class="izakaya-sticker sticker-left">酒</div>
+        <div class="izakaya-sticker sticker-right">笑</div>
+        <div class="table-line"></div>
+        ${state.lastRound.specialNotice ? `
+          <div class="special-float ${state.lastRound.specialNotice.side === "enemy" ? "enemy" : "player"} ${state.lastRound.specialNotice.effect}">
+            <div class="special-float-badge">绝活发动</div>
+            <div class="special-float-text">${state.lastRound.specialNotice.name}使出【${state.lastRound.specialNotice.skill}】</div>
+            <div class="special-float-sparks"><span></span><span></span><span></span></div>
+          </div>
+        ` : ""}
+
+        <div class="fighters-row">
+          ${fighterPanelMarkup(state.player)}
+          <div class="center-board">
+            <div class="sake-bottle">
+              <div class="sake-cap"></div>
+              <div class="sake-label">本回合战报</div>
+              <div class="sake-summary">${state.lastRound.summary}</div>
+            </div>
+            <div class="round-sheet">
+              <div class="sheet-line">${state.lastRound.playerActionText}</div>
+              <div class="sheet-line">${state.lastRound.enemyActionText}</div>
+              <div class="sheet-line">你：${state.lastRound.playerCupText}</div>
+              <div class="sheet-line">对手：${state.lastRound.enemyCupText}</div>
+            </div>
+          </div>
+          ${fighterPanelMarkup(state.enemy)}
+        </div>
+      </div>
+
+      ${!isResult ? `
+        <section class="action-board">
+          <div class="action-head">
+            <div class="action-meta">
+              <div class="action-title">本回合抽到的技能卡</div>
+              <div class="special-callout">
+                <div class="special-callout-label">本角绝活</div>
+                <div class="special-callout-name">${state.player.special.icon} ${state.player.special.name}</div>
+                <div class="special-callout-desc">${state.player.special.desc}</div>
+                <div class="special-callout-flavor">${state.player.special.flavor}</div>
+              </div>
+            </div>
+            <div class="special-action-box">
+              <button class="special-btn ${state.player.specialButtonClass}" data-action="use-special" ${uiState.busy || state.player.special.usesLeft <= 0 ? "disabled" : ""}>${state.player.specialButtonText}</button>
+            </div>
+          </div>
+          ${uiState.busy ? `<div class="busy-strip">${uiState.busyText}</div>` : ""}
+          <div class="hand-grid">
+            ${state.playerHand.map((card, index) => `
+              <button class="card-btn tone-${card.tone}" data-action="use-card" data-index="${index}" ${uiState.busy ? "disabled" : ""}>
+                <div class="skill-icon">${card.icon}</div>
+                <div class="skill-copy">
+                  <div class="skill-name-row">
+                    <div class="skill-name">${card.name}</div>
+                    ${card.rarity === "rare" ? `<span class="rarity-badge">稀有</span>` : ""}
+                  </div>
+                  <div class="catalog-desc">${card.desc}</div>
+                  <div class="catalog-flavor">${card.flavor}</div>
+                </div>
+              </button>
+            `).join("")}
+          </div>
+        </section>
+      ` : `
+        <section class="result-panel">
+          <div class="result-title">${state.result.title}</div>
+          <div class="result-desc">${state.result.desc}</div>
+          <div class="result-actions">
+            ${state.result?.nextStageUnlocked ? `<button class="restart-btn" data-action="next-stage">进入下一关</button>` : `<button class="restart-btn" data-action="restart">${state.result?.isCampaignClear ? "从第一关再打" : "同关再来一局"}</button>`}
+            <button class="back-btn" data-action="back-select">返回换人</button>
+          </div>
+        </section>
+      `}
+
+      <section class="log-card">
+        <div class="log-head">纸灯笼战报</div>
+        <div class="log-scroll">
+          ${state.logs.map((log) => `
+            <div class="log-item">
+              <div class="log-round">R${log.round}</div>
+              <div class="log-text">${log.text}</div>
+            </div>
+          `).join("")}
+        </div>
+      </section>
+    </section>
+  `;
+}
+
+function render() {
+  const root = document.getElementById("app");
+  root.innerHTML = uiState.screen === "select" ? renderSelectScreen() : renderBattleScreen();
+}
+
+function startBattle(characterId) {
+  uiState.gameState = createBattle(characterId, uiState.campaignStage || 0);
+  uiState.screen = "battle";
+  uiState.busy = false;
+  uiState.busyText = "";
+  render();
+  playSfx("select");
+}
+
+function restartBattle() {
+  if (uiState.gameState?.result?.isCampaignClear) {
+    uiState.campaignStage = 0;
+  }
+  startBattle(uiState.gameState.player.id);
+}
+
+function nextCampaignStage() {
+  if (!uiState.gameState) return;
+  uiState.campaignStage = Math.min(uiState.campaignStage + 1, ENEMY_STAGE_DEFS.length - 1);
+  startBattle(uiState.gameState.player.id);
+}
+
+function backToSelect() {
+  uiState.campaignStage = 0;
+  uiState.screen = "select";
+  uiState.gameState = null;
+  uiState.busy = false;
+  uiState.busyText = "";
+  render();
+}
+
+function resolveRound(choice) {
+  if (!uiState.gameState || uiState.busy || uiState.gameState.stage !== "battle") return;
+  uiState.busy = true;
+  uiState.busyText = getBusyText(uiState.gameState.enemy);
+  const selectedCard = choice.type === "card" ? uiState.gameState.playerHand[choice.cardIndex] : null;
+  playSfx(choice.type === "special" ? "special" : sfxKindForCard(selectedCard));
+  render();
+
+  setTimeout(() => {
+    uiState.gameState = playRound(uiState.gameState, choice);
+    uiState.busy = false;
+    uiState.busyText = "";
+    render();
+    if (uiState.gameState?.lastRound) {
+      const totalCups = (uiState.gameState.lastRound.playerCups || 0) + (uiState.gameState.lastRound.enemyCups || 0);
+      playSfx(totalCups >= 4 ? "drink-heavy" : "drink");
+    }
+    if (uiState.gameState.stage === "result") {
+      playSfx(uiState.gameState.result.title === "你把对面喝趴了" ? "win" : "lose");
+    }
+    const logScroll = document.querySelector(".log-scroll");
+    if (logScroll) logScroll.scrollTop = logScroll.scrollHeight;
+  }, 420);
+}
+
+document.addEventListener("click", (event) => {
+  const target = event.target.closest("[data-action]");
+  if (!target) return;
+
+  const { action } = target.dataset;
+  if (action === "toggle-audio") toggleAudio();
+  if (action === "select-character") startBattle(target.dataset.character);
+  if (action === "use-card") resolveRound({ type: "card", cardIndex: Number(target.dataset.index) });
+  if (action === "use-special") resolveRound({ type: "special" });
+  if (action === "restart") restartBattle();
+  if (action === "next-stage") nextCampaignStage();
+  if (action === "back-select") backToSelect();
+});
+
+function sfxKindForCard(card) {
+  if (!card) return "card";
+  if (card.id === "red_bull") return "boost";
+  if (card.id === "snack_guard") return "recovery";
+  return "card";
+}
+
+render();
+</script>
 </body>
 </html>
