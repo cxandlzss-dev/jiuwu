@@ -4,6 +4,7 @@ const HAND_SIZE = 3;
 const LOG_LIMIT = 18;
 
 const CARD_POOL = [
+  { id: "dice_duel", name: "摇骰子", icon: "🎲", tone: "gold", desc: "双方同时摇骰子，点数小的一方当场喝 1 杯。", flavor: "先把运气摇出来，再看谁真要接这一口。", kind: "chaos", rarity: "common", weight: 0.92 },
   { id: "pretend_drunk", name: "装醉", icon: "😴", tone: "plum", desc: "下回合无视对方让你喝的酒。", flavor: "趴桌三秒，酒桌系统临时查无此人。", kind: "defense", rarity: "common", weight: 1 },
   { id: "flatter", name: "奉承", icon: "🙇", tone: "amber", desc: "让对方本回合多喝 1 杯。", flavor: "这话一说出口，对面不喝都像不给面子。", kind: "attack", rarity: "common", weight: 1 },
   { id: "throat_purge", name: "捅喉咙", icon: "🤮", tone: "rare-gag", desc: "吐掉上回合喝的酒，上回合酒醉度不算。", flavor: "趁人没注意，扶着墙根一阵操作，上一轮白喝了。", kind: "recovery", rarity: "rare", weight: 0.2 },
@@ -516,6 +517,7 @@ function createRoundContext(fighter) {
     setZeroNextRound: false,
     persistHalfRounds: 0,
     extraSpecialUse: 0,
+    diceCall: false,
     pose: "idle",
     poseLabel: ""
   };
@@ -561,6 +563,12 @@ function applyAction(actor, target, action, selfRound, targetRound, state, round
       selfRound.pose = "sick";
       selfRound.poseLabel = "吐";
       pushLog(state, `${actor.name}使出【捅喉咙】，硬把上回合那口酒给吐没了。`, roundNumber);
+      break;
+    case "dice_duel":
+      selfRound.diceCall = true;
+      selfRound.pose = "snap";
+      selfRound.poseLabel = "骰";
+      pushLog(state, `${actor.name}鎶婇瀛愬線妗屼腑涓€鎺旓紝瑕佸拰${target.name}褰撳満姣旂偣鏁般€俙, roundNumber);
       break;
     case "raise_fish":
       selfRound.effectMultiplier *= 0.75;
@@ -670,6 +678,27 @@ function resolveProtection(fighter, roundCtx, state, roundNumber) {
     roundCtx.forcedByOpponent = 0;
     pushLog(state, `${fighter.name}的装醉保护生效，躲掉了 ${blocked} 杯灌酒。`, roundNumber);
   }
+}
+
+function resolveDiceDuel(player, enemy, playerRound, enemyRound, state, roundNumber) {
+  if (!playerRound.diceCall && !enemyRound.diceCall) return null;
+  const playerRoll = Math.floor(Math.random() * 6) + 1;
+  const enemyRoll = Math.floor(Math.random() * 6) + 1;
+  let loser = "draw";
+
+  if (playerRoll < enemyRoll) {
+    playerRound.forcedByOpponent += 1;
+    loser = "player";
+    pushLog(state, `${player.name}鎽囧嚭 ${playerRoll} 鐐癸紝${enemy.name}鎽囧嚭 ${enemyRoll} 鐐癸紝浣犵偣鏁板皬锛屽綋鍦哄鍠?1 鏉€俙, roundNumber);
+  } else if (enemyRoll < playerRoll) {
+    enemyRound.forcedByOpponent += 1;
+    loser = "enemy";
+    pushLog(state, `${player.name}鎽囧嚭 ${playerRoll} 鐐癸紝${enemy.name}鎽囧嚭 ${enemyRoll} 鐐癸紝瀵规墜鐐规暟灏忥紝褰撳満澶氬枬 1 鏉€俙, roundNumber);
+  } else {
+    pushLog(state, `${player.name}鍜?${enemy.name}閮芥憞鍑?${playerRoll} 鐐癸紝杩欐妸骞虫墜锛屽厛绠楁墦骞炽€俙, roundNumber);
+  }
+
+  return { playerRoll, enemyRoll, loser };
 }
 
 function settlePersistentStatus(fighter, roundCtx) {
