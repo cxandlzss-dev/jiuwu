@@ -568,7 +568,7 @@ function applyAction(actor, target, action, selfRound, targetRound, state, round
       selfRound.diceCall = true;
       selfRound.pose = "snap";
       selfRound.poseLabel = "骰";
-      pushLog(state, `${actor.name}鎶婇瀛愬線妗屼腑涓€鎺旓紝瑕佸拰${target.name}褰撳満姣旂偣鏁般€俙, roundNumber);
+      pushLog(state, `${actor.name}把骰子往桌中一掷，要和${target.name}当场比点数。`, roundNumber);
       break;
     case "raise_fish":
       selfRound.effectMultiplier *= 0.75;
@@ -689,13 +689,13 @@ function resolveDiceDuel(player, enemy, playerRound, enemyRound, state, roundNum
   if (playerRoll < enemyRoll) {
     playerRound.forcedByOpponent += 1;
     loser = "player";
-    pushLog(state, `${player.name}鎽囧嚭 ${playerRoll} 鐐癸紝${enemy.name}鎽囧嚭 ${enemyRoll} 鐐癸紝浣犵偣鏁板皬锛屽綋鍦哄鍠?1 鏉€俙, roundNumber);
+    pushLog(state, `${player.name}摇出 ${playerRoll} 点，${enemy.name}摇出 ${enemyRoll} 点，你点数小，当场多喝 1 杯。`, roundNumber);
   } else if (enemyRoll < playerRoll) {
     enemyRound.forcedByOpponent += 1;
     loser = "enemy";
-    pushLog(state, `${player.name}鎽囧嚭 ${playerRoll} 鐐癸紝${enemy.name}鎽囧嚭 ${enemyRoll} 鐐癸紝瀵规墜鐐规暟灏忥紝褰撳満澶氬枬 1 鏉€俙, roundNumber);
+    pushLog(state, `${player.name}摇出 ${playerRoll} 点，${enemy.name}摇出 ${enemyRoll} 点，对手点数小，当场多喝 1 杯。`, roundNumber);
   } else {
-    pushLog(state, `${player.name}鍜?${enemy.name}閮芥憞鍑?${playerRoll} 鐐癸紝杩欐妸骞虫墜锛屽厛绠楁墦骞炽€俙, roundNumber);
+    pushLog(state, `${player.name}和${enemy.name}都摇出 ${playerRoll} 点，这把平手，先算打平。`, roundNumber);
   }
 
   return { playerRoll, enemyRoll, loser };
@@ -932,7 +932,7 @@ function renderSelectScreen() {
   return `
     <section>
       <div class="hero-banner">
-        <img class="hero-icon" src="./assets/icon-jiuwu-dazhan.png" alt="酒屋大战图标" onerror="this.style.display='none'">
+        <img class="hero-icon" src="./assets/icon-jiuwu-dazhan.png" alt="酒屋大战图标">
         <div>
           <div class="hero-chip">居酒屋回合战</div>
           <div class="hero-title">酒屋大战</div>
