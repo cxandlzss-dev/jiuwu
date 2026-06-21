@@ -1,12 +1,12 @@
 const MAX_DRUNK = 100;
-const BASE_DRUNK_PER_CUP = 10;
+const BASE_DRUNK_PER_CUP = 8;
 const HAND_SIZE = 3;
 const LOG_LIMIT = 18;
 
 const CARD_POOL = [
   { id: "pretend_drunk", name: "装醉", icon: "😴", tone: "plum", desc: "下回合无视对方让你喝的酒。", flavor: "趴桌三秒，酒桌系统临时查无此人。", kind: "defense", rarity: "common", weight: 1 },
   { id: "flatter", name: "奉承", icon: "🙇", tone: "amber", desc: "让对方本回合多喝 1 杯。", flavor: "这话一说出口，对面不喝都像不给面子。", kind: "attack", rarity: "common", weight: 1 },
-  { id: "dilute", name: "掺水", icon: "🫗", tone: "jade", desc: "本回合你喝的酒只按 50% 酒醉度结算。", flavor: "白的变清的，脸上还得装得很真诚。", kind: "defense", rarity: "common", weight: 1 },
+  { id: "throat_purge", name: "捅喉咙", icon: "🤮", tone: "rare-gag", desc: "吐掉上回合喝的酒，上回合酒醉度不算。", flavor: "趁人没注意，扶着墙根一阵操作，上一轮白喝了。", kind: "recovery", rarity: "rare", weight: 0.2 },
   { id: "raise_fish", name: "养鱼", icon: "🐟", tone: "teal", desc: "本回合你喝的酒只按 75% 酒醉度结算。", flavor: "酒杯里讲究一个缓慢游泳，绝不一口到底。", kind: "defense", rarity: "common", weight: 1 },
   { id: "water_as_wine", name: "指水为酒", icon: "💧", tone: "rare-water", desc: "本回合你喝的酒不产生酒醉度。", flavor: "睁眼说瞎话，杯里全是正经自来水。", kind: "defense", rarity: "rare", weight: 0.22 },
   { id: "red_bull", name: "喝红牛", icon: "🥤", tone: "rare-bull", desc: "立刻增加 1 次绝活使用机会。", flavor: "先把精神顶上来，今晚还能再来一手绝活。", kind: "boost", rarity: "rare", weight: 0.24 },
@@ -46,12 +46,46 @@ const CHARACTER_DEFS = {
   }
 };
 
+const ENEMY_STAGE_DEFS = [
+  {
+    id: "yanchang_changzhang",
+    shortLabel: "烟",
+    name: "烟厂厂长",
+    title: "一手夹烟，一手劝酒，开口就带呛味",
+    tagline: "第一关，烟雾里先练胆",
+    quote: "先别养鱼，先把这口辛辣的规矩咽下去。",
+    special: { id: "smoke_pressure", name: "呛烟劝杯", icon: "🚬", desc: "本回合强迫你多喝 1 杯，并让你本回合酒醉度提高 20%。", flavor: "烟一弹，话一压，杯子就往你手里靠。" },
+    aiTier: 1
+  },
+  {
+    id: "ma_zong",
+    shortLabel: "马",
+    name: "马总",
+    title: "墨镜一戴，杯路全开，敬酒像签合同",
+    tagline: "第二关，气场开始收税",
+    quote: "这杯不是酒，是诚意；你不干，就是流程没走完。",
+    special: { id: "boss_contract", name: "老板加码", icon: "🕶️", desc: "本回合你额外喝 2 杯，马总自己这回合酒醉度只按 50% 结算。", flavor: "墨镜一推，条件一开，你就知道今天不是来聊天的。" },
+    aiTier: 2
+  },
+  {
+    id: "yuwen_laoshi",
+    shortLabel: "文",
+    name: "语文老师",
+    title: "胖乎乎一拍桌，修辞和酒杯一起压过来",
+    tagline: "第三关，嘴上功夫就是终局压力",
+    quote: "这杯你要从修辞、语气、中心思想三个层面认真喝。",
+    special: { id: "full_marks_recite", name: "全文背诵", icon: "📚", desc: "你本回合额外喝 2 杯，且下回合再被额外灌 1 杯。", flavor: "他一脸浮夸地抬手点名，酒桌瞬间变成公开课。" },
+    aiTier: 3
+  }
+];
+
 const uiState = {
   screen: "select",
   gameState: null,
   busy: false,
   busyText: "",
-  audioEnabled: false
+  audioEnabled: false,
+  campaignStage: 0
 };
 
 let audioContextRef = null;
@@ -115,7 +149,7 @@ function pushLog(state, text, round) {
 }
 
 function buildFighter(characterId, side) {
-  const source = clone(CHARACTER_DEFS[characterId]);
+  const source = clone(CHARACTER_DEFS[characterId] || ENEMY_STAGE_DEFS.find((item) => item.id === characterId));
   return {
     id: source.id,
     side,
@@ -143,10 +177,13 @@ function buildFighter(characterId, side) {
       flavor: source.special.flavor,
       usesLeft: 1
     },
+    aiTier: source.aiTier || 0,
     status: {
       ignoreForcedNextRound: false,
       halfEffectRounds: 0,
-      zeroNextRound: false
+      zeroNextRound: false,
+      lastRoundGain: 0,
+      nextRoundExtraForced: 0
     }
   };
 }
@@ -342,14 +379,15 @@ async function playSfx(kind) {
   }
 }
 
-function createBattle(playerId) {
-  const enemyOptions = Object.keys(CHARACTER_DEFS).filter((id) => id !== playerId);
-  const enemyId = randomFromList(enemyOptions);
+function createBattle(playerId, stageIndex = uiState.campaignStage || 0) {
+  const enemyDef = ENEMY_STAGE_DEFS[Math.min(stageIndex, ENEMY_STAGE_DEFS.length - 1)];
   const state = {
     stage: "battle",
+    battleMode: "campaign",
+    campaignStage: Math.min(stageIndex, ENEMY_STAGE_DEFS.length - 1),
     round: 1,
     player: buildFighter(playerId, "player"),
-    enemy: buildFighter(enemyId, "enemy"),
+    enemy: buildFighter(enemyDef.id, "enemy"),
     playerHand: drawCards(HAND_SIZE),
     enemyHand: drawCards(HAND_SIZE),
     logs: [],
@@ -366,7 +404,7 @@ function createBattle(playerId) {
   };
   pushLog(state, `${state.player.name}推门进店，今夜对手是${state.enemy.name}。`, 0);
   pushLog(state, "老板把酒盅一摆：每回合双方默认都得先喝 1 杯。", 0);
-  state.roundBanner = `${state.enemy.name}已经坐下，灯笼一晃，第一回合开喝。`;
+  state.roundBanner = `第 ${state.campaignStage + 1} 关 ${state.enemy.name}已经坐下，灯笼一晃，第一回合开喝。`;
   return decorateState(state);
 }
 
@@ -384,6 +422,15 @@ function chooseEnemyAction(state) {
     if (actor.id === "yueyueniao" && actor.drunkness >= 50) {
       return { type: "special" };
     }
+    if (actor.id === "yanchang_changzhang" && (state.round >= 2 || target.drunkness >= 24)) {
+      return { type: "special" };
+    }
+    if (actor.id === "ma_zong" && (state.round >= 2 || target.drunkness >= 34)) {
+      return { type: "special" };
+    }
+    if (actor.id === "yuwen_laoshi" && (state.round >= 2 || target.drunkness >= 40)) {
+      return { type: "special" };
+    }
   }
 
   let bestScore = -9999;
@@ -399,8 +446,8 @@ function chooseEnemyAction(state) {
       case "flatter":
         score += targetShieldActive ? 1 : 16 + target.drunkness / 8;
         break;
-      case "dilute":
-        score += actor.drunkness >= 38 ? 12 : 5;
+      case "throat_purge":
+        score += actor.status.lastRoundGain > 0 ? 13 + actor.status.lastRoundGain * 0.2 : 2;
         break;
       case "raise_fish":
         score += actor.drunkness >= 32 ? 10 : 4;
@@ -431,6 +478,21 @@ function chooseEnemyAction(state) {
         score += 1;
     }
 
+    if (actor.aiTier === 1) {
+      if (card.id === "flatter") score += 3;
+      if (card.id === "drink_together" && actor.drunkness >= 50) score -= 5;
+    } else if (actor.aiTier === 2) {
+      if (card.id === "flatter") score += 5;
+      if (card.id === "water_as_wine") score += 4;
+      if (card.id === "drink_together" && target.drunkness >= actor.drunkness + 10) score += 5;
+    } else if (actor.aiTier >= 3) {
+      if (card.id === "flatter") score += 7;
+      if (card.id === "pass_the_cup") score += 4;
+      if (card.id === "counter_toast") score += 5;
+      if (card.id === "drink_together" && actor.drunkness >= 58) score -= 8;
+      if (card.id === "throat_purge" && actor.status.lastRoundGain > 0) score += 6;
+    }
+
     if (score > bestScore) {
       bestScore = score;
       bestIndex = index;
@@ -447,6 +509,7 @@ function createRoundContext(fighter) {
     effectMultiplier: 1,
     zeroDrunk: false,
     relief: 0,
+    undoLastGain: false,
     returnOneForced: false,
     ignoreForcedThisRound: !!fighter.status.ignoreForcedNextRound,
     setIgnoreForcedNextRound: false,
@@ -493,11 +556,11 @@ function applyAction(actor, target, action, selfRound, targetRound, state, round
       selfRound.poseLabel = "敬";
       pushLog(state, `${actor.name}一顿猛夸，把${target.name}夸得多喝 1 杯。`, roundNumber);
       break;
-    case "dilute":
-      selfRound.effectMultiplier *= 0.5;
-      selfRound.pose = "water";
-      selfRound.poseLabel = "兑";
-      pushLog(state, `${actor.name}偷偷掺水，本回合酒劲直接砍半。`, roundNumber);
+    case "throat_purge":
+      selfRound.undoLastGain = true;
+      selfRound.pose = "sick";
+      selfRound.poseLabel = "吐";
+      pushLog(state, `${actor.name}使出【捅喉咙】，硬把上回合那口酒给吐没了。`, roundNumber);
       break;
     case "raise_fish":
       selfRound.effectMultiplier *= 0.75;
@@ -562,6 +625,27 @@ function applyAction(actor, target, action, selfRound, targetRound, state, round
       selfRound.poseLabel = "WC";
       pushLog(state, `${actor.name}发动绝活【上厕所】，先把下回合整成免醉档。`, roundNumber);
       break;
+    case "smoke_pressure":
+      targetRound.forcedByOpponent += 1;
+      targetRound.effectMultiplier *= 1.2;
+      selfRound.pose = "smirk";
+      selfRound.poseLabel = "烟";
+      pushLog(state, `${actor.name}吐着烟圈发动【呛烟劝杯】，硬让${target.name}多喝 1 杯，酒劲还更冲。`, roundNumber);
+      break;
+    case "boss_contract":
+      targetRound.forcedByOpponent += 2;
+      selfRound.effectMultiplier *= 0.5;
+      selfRound.pose = "command";
+      selfRound.poseLabel = "总";
+      pushLog(state, `${actor.name}发动【老板加码】，把合同感都压进酒里，自己却只吃半份酒劲。`, roundNumber);
+      break;
+    case "full_marks_recite":
+      targetRound.forcedByOpponent += 2;
+      target.status.nextRoundExtraForced += 1;
+      selfRound.pose = "command";
+      selfRound.poseLabel = "背";
+      pushLog(state, `${actor.name}发动【全文背诵】，当场点你多喝 2 杯，还把下回合作业也布置上了。`, roundNumber);
+      break;
     default:
       break;
   }
@@ -606,13 +690,15 @@ function settlePersistentStatus(fighter, roundCtx) {
 }
 
 function calculateGain(fighter, roundCtx) {
-  const soberBase = clamp(fighter.drunkness - roundCtx.relief, 0, fighter.maxDrunkness);
+  const undone = roundCtx.undoLastGain ? fighter.status.lastRoundGain : 0;
+  const soberBase = clamp(fighter.drunkness - roundCtx.relief - undone, 0, fighter.maxDrunkness);
   const totalCups = Math.max(0, roundCtx.baseCups + roundCtx.forcedByOpponent);
   const gain = roundCtx.zeroDrunk ? 0 : Math.round(totalCups * BASE_DRUNK_PER_CUP * roundCtx.effectMultiplier);
   fighter.drunkness = clamp(soberBase + gain, 0, fighter.maxDrunkness);
   fighter.pose = roundCtx.pose;
   fighter.poseLabel = roundCtx.poseLabel;
-  return { totalCups, gain };
+  fighter.status.lastRoundGain = gain;
+  return { totalCups, gain, undone };
 }
 
 function buildResult(player, enemy, roundNumber) {
@@ -630,6 +716,11 @@ function buildRoundBanner(player, enemy) {
   if (Math.abs(player.drunkness - enemy.drunkness) <= 10) return "两边都在强撑体面，空气里全是嘴硬。";
   if (player.drunkness < enemy.drunkness) return `${player.name}明显更稳，${enemy.name}的眼神开始飘了。`;
   return `${enemy.name}目前更稳，${player.name}正在努力装没事。`;
+}
+
+function getStageIntro(stageIndex) {
+  const stage = ENEMY_STAGE_DEFS[Math.min(stageIndex, ENEMY_STAGE_DEFS.length - 1)];
+  return `第 ${stageIndex + 1} 关开桌：${stage.name}已经端杯坐定。`;
 }
 
 function decorateFighter(fighter) {
@@ -698,12 +789,27 @@ function playRound(prevState, playerChoice) {
   const playerRound = createRoundContext(state.player);
   const enemyRound = createRoundContext(state.enemy);
 
+  if (state.player.status.nextRoundExtraForced > 0) {
+    playerRound.forcedByOpponent += state.player.status.nextRoundExtraForced;
+    state.player.status.nextRoundExtraForced = 0;
+  }
+  if (state.enemy.status.nextRoundExtraForced > 0) {
+    enemyRound.forcedByOpponent += state.enemy.status.nextRoundExtraForced;
+    state.enemy.status.nextRoundExtraForced = 0;
+  }
+
   if (state.player.status.halfEffectRounds > 0) playerRound.effectMultiplier *= 0.5;
   if (state.enemy.status.halfEffectRounds > 0) enemyRound.effectMultiplier *= 0.5;
   if (state.player.status.zeroNextRound) playerRound.zeroDrunk = true;
   if (state.enemy.status.zeroNextRound) enemyRound.zeroDrunk = true;
   if (playerChoice.type === "special") state.player.special.usesLeft = Math.max(0, state.player.special.usesLeft - 1);
   if (enemyChoice.type === "special") state.enemy.special.usesLeft = Math.max(0, state.enemy.special.usesLeft - 1);
+
+  const specialNotice = playerAction.type === "special"
+    ? { side: "player", name: state.player.name, skill: playerAction.name, effect: "flame" }
+    : enemyAction.type === "special"
+      ? { side: "enemy", name: state.enemy.name, skill: enemyAction.name, effect: state.enemy.aiTier >= 2 ? "lightning" : "flame" }
+      : null;
 
   pushLog(state, `第 ${roundNumber} 回合开喝：双方先端起默认那一杯。`, roundNumber);
   applyAction(state.player, state.enemy, playerAction, playerRound, enemyRound, state, roundNumber);
@@ -722,10 +828,11 @@ function playRound(prevState, playerChoice) {
     summary: `${state.player.name}使出【${playerAction.name}】，${state.enemy.name}应对【${enemyAction.name}】。`,
     playerActionText: `你出：${playerAction.name}`,
     enemyActionText: `对手出：${enemyAction.name}`,
-    playerCupText: `${playerGain.totalCups} 杯 / +${playerGain.gain}`,
-    enemyCupText: `${enemyGain.totalCups} 杯 / +${enemyGain.gain}`,
+    playerCupText: `${playerGain.totalCups} 杯 / +${playerGain.gain}${playerGain.undone ? ` / 吐-${playerGain.undone}` : ""}`,
+    enemyCupText: `${enemyGain.totalCups} 杯 / +${enemyGain.gain}${enemyGain.undone ? ` / 吐-${enemyGain.undone}` : ""}`,
     playerCups: playerGain.totalCups,
-    enemyCups: enemyGain.totalCups
+    enemyCups: enemyGain.totalCups,
+    specialNotice
   };
 
   pushLog(state, `${state.player.name}本回合喝了 ${playerGain.totalCups} 杯，酒醉度来到 ${state.player.drunkness}。${state.enemy.name}喝了 ${enemyGain.totalCups} 杯，酒醉度来到 ${state.enemy.drunkness}。`, roundNumber);
@@ -733,6 +840,10 @@ function playRound(prevState, playerChoice) {
   if (state.player.drunkness >= MAX_DRUNK || state.enemy.drunkness >= MAX_DRUNK) {
     state.stage = "result";
     state.result = buildResult(state.player, state.enemy, roundNumber);
+    if (state.enemy.drunkness >= MAX_DRUNK && state.battleMode === "campaign") {
+      state.result.nextStageUnlocked = state.campaignStage < ENEMY_STAGE_DEFS.length - 1;
+      state.result.isCampaignClear = state.campaignStage >= ENEMY_STAGE_DEFS.length - 1;
+    }
     state.roundBanner = state.result.desc;
     pushLog(state, `${state.result.title}。`, roundNumber);
     return decorateState(state);
@@ -796,7 +907,7 @@ function renderSelectScreen() {
         <div>
           <div class="hero-chip">居酒屋回合战</div>
           <div class="hero-title">酒屋大战</div>
-          <div class="hero-subtitle">选一个酒桌狠人开局。每回合默认喝 1 杯，靠技能卡少喝、让对手多喝，谁先醉倒谁输。</div>
+          <div class="hero-subtitle">选一个己方狠人守擂。你要一路挑战烟厂厂长、马总、语文老师三关，越往后越会劝酒。</div>
           <div class="hero-actions">
             <button class="sound-btn" data-action="toggle-audio">${uiState.audioEnabled ? "音乐已开" : "点我开音乐"}</button>
             <span class="audio-pill">${uiState.audioEnabled ? "背景乐 + 音效开启" : "微信里首次点一下即可启用声音"}</span>
@@ -808,14 +919,14 @@ function renderSelectScreen() {
         <div class="rule-pill">每回合双方默认喝 1 杯</div>
         <div class="rule-pill">随机抽 3 张技能卡</div>
         <div class="rule-pill">角色绝活每局 1 次</div>
-        <div class="rule-pill">酒醉度满 100 就晕</div>
+        <div class="rule-pill">三关首领逐关变强</div>
       </div>
 
       <div class="roster">
         ${roster.map((item) => `
-          <article class="roster-card">
+          <article class="roster-card roster-card-${item.id}">
             <div class="roster-stamp">${item.shortLabel}</div>
-            <div class="mini-stage">${avatarMarkup(item.rosterClass, "", true)}</div>
+            <div class="mini-stage mini-stage-${item.id}">${avatarMarkup(item.rosterClass, "", true)}</div>
             <div class="roster-name">${item.name}</div>
             <div class="roster-title">${item.title}</div>
             <div class="roster-tagline">${item.tagline}</div>
@@ -824,7 +935,7 @@ function renderSelectScreen() {
               <div class="special-desc">${item.special.desc}</div>
             </div>
             <div class="roster-quote">“${item.quote}”</div>
-            <button class="pick-btn" data-action="select-character" data-character="${item.id}">选他开喝</button>
+            <button class="pick-btn" data-action="select-character" data-character="${item.id}">选他守擂</button>
           </article>
         `).join("")}
       </div>
@@ -877,9 +988,9 @@ function renderBattleScreen() {
   return `
     <section>
       <div class="battle-header">
-        <div>
+        <div class="battle-headline">
           <div class="battle-title">酒屋大战</div>
-          <div class="battle-subtitle">${state.player.name} VS ${state.enemy.name}</div>
+          <div class="battle-subtitle">第 ${state.campaignStage + 1} 关 ${state.player.name} VS ${state.enemy.name}</div>
         </div>
         <div class="battle-header-side">
           <button class="sound-btn small" data-action="toggle-audio">${uiState.audioEnabled ? "关音乐" : "开音乐"}</button>
@@ -907,6 +1018,13 @@ function renderBattleScreen() {
         <div class="izakaya-sticker sticker-left">酒</div>
         <div class="izakaya-sticker sticker-right">笑</div>
         <div class="table-line"></div>
+        ${state.lastRound.specialNotice ? `
+          <div class="special-float ${state.lastRound.specialNotice.side === "enemy" ? "enemy" : "player"} ${state.lastRound.specialNotice.effect}">
+            <div class="special-float-badge">绝活发动</div>
+            <div class="special-float-text">${state.lastRound.specialNotice.name}使出【${state.lastRound.specialNotice.skill}】</div>
+            <div class="special-float-sparks"><span></span><span></span><span></span></div>
+          </div>
+        ` : ""}
 
         <div class="fighters-row">
           ${fighterPanelMarkup(state.player)}
@@ -939,7 +1057,9 @@ function renderBattleScreen() {
                 <div class="special-callout-flavor">${state.player.special.flavor}</div>
               </div>
             </div>
-            <button class="special-btn ${state.player.specialButtonClass}" data-action="use-special" ${uiState.busy || state.player.special.usesLeft <= 0 ? "disabled" : ""}>${state.player.specialButtonText}</button>
+            <div class="special-action-box">
+              <button class="special-btn ${state.player.specialButtonClass}" data-action="use-special" ${uiState.busy || state.player.special.usesLeft <= 0 ? "disabled" : ""}>${state.player.specialButtonText}</button>
+            </div>
           </div>
           ${uiState.busy ? `<div class="busy-strip">${uiState.busyText}</div>` : ""}
           <div class="hand-grid">
@@ -963,7 +1083,7 @@ function renderBattleScreen() {
           <div class="result-title">${state.result.title}</div>
           <div class="result-desc">${state.result.desc}</div>
           <div class="result-actions">
-            <button class="restart-btn" data-action="restart">同角色再来一局</button>
+            ${state.result?.nextStageUnlocked ? `<button class="restart-btn" data-action="next-stage">进入下一关</button>` : `<button class="restart-btn" data-action="restart">${state.result?.isCampaignClear ? "从第一关再打" : "同关再来一局"}</button>`}
             <button class="back-btn" data-action="back-select">返回换人</button>
           </div>
         </section>
@@ -990,7 +1110,7 @@ function render() {
 }
 
 function startBattle(characterId) {
-  uiState.gameState = createBattle(characterId);
+  uiState.gameState = createBattle(characterId, uiState.campaignStage || 0);
   uiState.screen = "battle";
   uiState.busy = false;
   uiState.busyText = "";
@@ -999,10 +1119,20 @@ function startBattle(characterId) {
 }
 
 function restartBattle() {
+  if (uiState.gameState?.result?.isCampaignClear) {
+    uiState.campaignStage = 0;
+  }
+  startBattle(uiState.gameState.player.id);
+}
+
+function nextCampaignStage() {
+  if (!uiState.gameState) return;
+  uiState.campaignStage = Math.min(uiState.campaignStage + 1, ENEMY_STAGE_DEFS.length - 1);
   startBattle(uiState.gameState.player.id);
 }
 
 function backToSelect() {
+  uiState.campaignStage = 0;
   uiState.screen = "select";
   uiState.gameState = null;
   uiState.busy = false;
@@ -1045,6 +1175,7 @@ document.addEventListener("click", (event) => {
   if (action === "use-card") resolveRound({ type: "card", cardIndex: Number(target.dataset.index) });
   if (action === "use-special") resolveRound({ type: "special" });
   if (action === "restart") restartBattle();
+  if (action === "next-stage") nextCampaignStage();
   if (action === "back-select") backToSelect();
 });
 
