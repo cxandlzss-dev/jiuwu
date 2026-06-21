@@ -43,6 +43,7 @@ button {
 
 .paper-bg {
   position: absolute;
+  z-index: 0;
   top: 110px;
   right: 12px;
   bottom: 10px;

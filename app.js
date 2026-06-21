@@ -932,7 +932,7 @@ function renderSelectScreen() {
   return `
     <section>
       <div class="hero-banner">
-        <img class="hero-icon" src="./assets/icon-jiuwu-dazhan.png" alt="酒屋大战图标">
+        <img class="hero-icon" src="./assets/icon-jiuwu-dazhan.png" alt="酒屋大战图标" onerror="this.style.display='none'">
         <div>
           <div class="hero-chip">居酒屋回合战</div>
           <div class="hero-title">酒屋大战</div>
@@ -1212,20 +1212,7 @@ function sfxKindForCard(card) {
   if (!card) return "card";
   if (card.id === "red_bull") return "boost";
   if (card.id === "snack_guard") return "recovery";
-  if (card.id === "dice_duel") return "dice";
   return "card";
-}
-
-function getBusyText(enemy) {
-  const map = {
-    zhongju: "钟局正在扶眼镜，像在想下一句官话……",
-    bingwang: "兵王正在抖肩膀，像要把酒精训话……",
-    yueyueniao: "月月鸟哥正在左右看路，像在找新借口……",
-    yanchang_changzhang: "烟厂厂长正在抖烟灰，边吐烟边劝杯……",
-    ma_zong: "马总正在推墨镜，像下一句就要把你劝进合同里……",
-    yuwen_laoshi: "语文老师正在清嗓子，看样子又要一边修辞一边劝酒……"
-  };
-  return map[enemy.id] || "对手正在端杯子组织语言……";
 }
 
 render();
