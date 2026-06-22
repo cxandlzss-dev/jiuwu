@@ -3516,22 +3516,55 @@ button {
     left: 4px;
     right: 4px;
     bottom: 138px;
-    min-height: 86px;
+    min-height: 64px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
   }
 
   .arena-pack-tipline,
   .arena-draw-pop {
-    padding: 10px;
+    padding: 8px;
     border-radius: 16px;
   }
 
+  .arena-draw-pop {
+    width: 75%;
+    max-width: 250px;
+    margin: 0 auto;
+  }
+
   .arena-draw-grid {
-    gap: 6px;
+    gap: 4px;
+    justify-items: center;
   }
 
   .draw-card {
-    min-height: 104px;
-    padding: 10px 8px;
+    width: 100%;
+    min-height: 74px;
+    padding: 6px 6px;
+    transform: none;
+  }
+
+  .draw-head {
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .pack-section-title {
+    font-size: 15px;
+  }
+
+  .ghost-btn {
+    min-height: 30px;
+    font-size: 10px;
+    padding: 0 8px;
+  }
+
+  .pack-tip {
+    margin-top: 6px;
+    font-size: 10px;
+    line-height: 1.35;
   }
 
   .arena-special-card {

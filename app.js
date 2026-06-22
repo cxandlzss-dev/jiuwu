@@ -1259,6 +1259,7 @@ function renderBattleScreen() {
         <div class="arena-top-report">
           <div class="sake-bottle arena-report-bottle">
             <div class="sake-cap"></div>
+            <div class="sake-label">本回合战报</div>
             <div class="sake-summary">${state.lastRound.summary}</div>
           </div>
         </div>
