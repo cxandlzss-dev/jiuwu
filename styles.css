@@ -1031,6 +1031,108 @@ button {
   box-shadow: 0 14px 24px rgba(117, 63, 31, 0.08);
 }
 
+.round-settlement {
+  position: absolute;
+  inset: 0;
+  z-index: 13;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 18px 190px;
+  background: linear-gradient(180deg, rgba(63, 23, 12, 0.14), rgba(63, 23, 12, 0.2));
+}
+
+.round-settlement-card {
+  width: min(100%, 430px);
+  padding: 20px 18px 18px;
+  border-radius: 26px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 20%),
+    linear-gradient(180deg, rgba(255, 249, 239, 0.98), rgba(244, 226, 191, 0.98));
+  box-shadow: 0 24px 40px rgba(83, 34, 15, 0.22);
+  text-align: center;
+}
+
+.round-settlement-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #6e2613;
+}
+
+.round-settlement-subtitle {
+  margin-top: 6px;
+  color: #875b43;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.round-settlement-grid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.settlement-side {
+  padding: 14px 12px;
+  border-radius: 18px;
+  background: rgba(255, 252, 246, 0.78);
+  box-shadow: inset 0 0 0 1px rgba(149, 82, 44, 0.1);
+}
+
+.settlement-side.player {
+  background: linear-gradient(180deg, rgba(255, 244, 219, 0.95), rgba(255, 231, 189, 0.88));
+}
+
+.settlement-side.enemy {
+  background: linear-gradient(180deg, rgba(255, 241, 227, 0.95), rgba(242, 214, 183, 0.88));
+}
+
+.settlement-name {
+  font-size: 18px;
+  font-weight: 800;
+  color: #4b1c10;
+}
+
+.settlement-gain {
+  margin-top: 8px;
+  font-size: 34px;
+  font-weight: 800;
+  color: #b12f16;
+  text-shadow: 0 2px 0 rgba(255, 245, 223, 0.8);
+}
+
+.settlement-gain.pop {
+  animation: settlement-pop 0.55s ease;
+}
+
+.settlement-meta,
+.settlement-note {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #7d5b48;
+  line-height: 1.45;
+}
+
+.settlement-note {
+  color: #8b3c21;
+  font-weight: 700;
+}
+
+.settlement-continue-btn {
+  margin-top: 16px;
+  min-width: 164px;
+  min-height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7a2315, #c94f20);
+  color: #fff4de;
+  font-size: 17px;
+  font-weight: 800;
+  box-shadow: 0 14px 24px rgba(122, 35, 21, 0.18);
+  cursor: pointer;
+}
+
 .action-board {
   margin-top: 22px;
 }
@@ -2767,6 +2869,12 @@ button {
   100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
 }
 
+@keyframes settlement-pop {
+  0% { opacity: 0; transform: translateY(18px) scale(0.72); }
+  65% { opacity: 1; transform: translateY(-4px) scale(1.08); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 @keyframes dice-shake {
   0% { transform: rotate(0deg) scale(1); }
   18% { transform: rotate(-10deg) translateY(-2px) scale(1.05); }
@@ -3313,6 +3421,49 @@ button {
     width: 116px;
     padding: 6px 7px;
     border-radius: 12px;
+  }
+
+  .round-settlement {
+    padding: 20px 10px 188px;
+  }
+
+  .round-settlement-card {
+    padding: 16px 12px 14px;
+    border-radius: 20px;
+  }
+
+  .round-settlement-title {
+    font-size: 18px;
+  }
+
+  .round-settlement-subtitle,
+  .settlement-meta,
+  .settlement-note {
+    font-size: 11px;
+  }
+
+  .round-settlement-grid {
+    gap: 8px;
+  }
+
+  .settlement-side {
+    padding: 10px 8px;
+    border-radius: 14px;
+  }
+
+  .settlement-name {
+    font-size: 15px;
+  }
+
+  .settlement-gain {
+    font-size: 24px;
+  }
+
+  .settlement-continue-btn {
+    min-width: 128px;
+    min-height: 36px;
+    font-size: 14px;
+    margin-top: 12px;
   }
 
   .status-row {

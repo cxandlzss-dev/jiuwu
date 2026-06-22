@@ -369,6 +369,9 @@ function createBattle(playerId, stageIndex = uiState.campaignStage || 0) {
     selectedCards: [],
     selectedSpecial: false,
     cardBagOpen: true,
+    awaitingRoundContinue: false,
+    roundSettlement: null,
+    pendingRoundAdvance: null,
     logs: [],
     logSeq: 0,
     roundBanner: "",
@@ -400,7 +403,7 @@ function prepareNextDraw(state) {
 }
 
 function canUseSelectedCards(state) {
-  return state.drawResolved && !state.pendingSwapCard;
+  return state.drawResolved && !state.pendingSwapCard && !state.awaitingRoundContinue;
 }
 
 function toggleCardBag(forceOpen) {
@@ -710,6 +713,26 @@ function buildResult(player, enemy, roundNumber) {
   return { title: "你先被抬去吹风了", desc: `第 ${roundNumber} 回合结束后你的酒醉度先爆表，老板建议你去门口醒醒酒。` };
 }
 
+function buildRoundSettlement(state, playerGain, enemyGain) {
+  return {
+    title: `第 ${state.round} 回合结算`,
+    player: {
+      name: state.player.name,
+      cups: playerGain.totalCups,
+      gain: playerGain.gain,
+      undone: playerGain.undone,
+      total: state.player.drunkness
+    },
+    enemy: {
+      name: state.enemy.name,
+      cups: enemyGain.totalCups,
+      gain: enemyGain.gain,
+      undone: enemyGain.undone,
+      total: state.enemy.drunkness
+    }
+  };
+}
+
 function buildRoundBanner(player, enemy) {
   if (player.drunkness >= MAX_DRUNK || enemy.drunkness >= MAX_DRUNK) return "酒盘已经见底，今晚这桌胜负已分。";
   if (Math.abs(player.drunkness - enemy.drunkness) <= 10) return "两边都在强撑体面，空气里全是嘴硬。";
@@ -835,6 +858,7 @@ function playRound(prevState, playerChoice) {
     specialNotice,
     diceDuel
   };
+  state.roundSettlement = buildRoundSettlement(state, playerGain, enemyGain);
 
   pushLog(state, `${state.player.name}本回合喝了 ${playerGain.totalCups} 杯，酒醉度来到 ${state.player.drunkness}。${state.enemy.name}喝了 ${enemyGain.totalCups} 杯，酒醉度来到 ${state.enemy.drunkness}。`, roundNumber);
 
@@ -850,12 +874,31 @@ function playRound(prevState, playerChoice) {
     return decorateState(state);
   }
 
-  state.round += 1;
-  state.playerHand = state.playerHand.filter((_, index) => !selectedIndices.includes(index));
-  state.enemyHand = drawCards(HAND_SIZE);
-  prepareNextDraw(state);
-  state.roundBanner = buildRoundBanner(state.player, state.enemy);
+  state.awaitingRoundContinue = true;
+  state.pendingRoundAdvance = {
+    selectedIndices
+  };
+  state.roundBanner = "本回合已结算，点继续进入下一回合抽卡。";
   return decorateState(state);
+}
+
+function continueNextRound() {
+  const state = uiState.gameState;
+  if (!state || uiState.busy || state.stage !== "battle" || !state.awaitingRoundContinue) return;
+  const nextState = clone(state);
+  const selectedIndices = nextState.pendingRoundAdvance?.selectedIndices || [];
+  nextState.awaitingRoundContinue = false;
+  nextState.pendingRoundAdvance = null;
+  nextState.roundSettlement = null;
+  nextState.round += 1;
+  nextState.playerHand = nextState.playerHand.filter((_, index) => !selectedIndices.includes(index));
+  nextState.enemyHand = drawCards(HAND_SIZE);
+  prepareNextDraw(nextState);
+  nextState.cardBagOpen = true;
+  nextState.roundBanner = buildRoundBanner(nextState.player, nextState.enemy);
+  uiState.gameState = decorateState(nextState);
+  playSfx("select");
+  render();
 }
 
 function getBusyText(enemy) {
@@ -1135,6 +1178,36 @@ function renderCardPackMarkup(state) {
   `;
 }
 
+function renderRoundSettlementMarkup(state) {
+  if (!state.awaitingRoundContinue || !state.roundSettlement) return "";
+  const { player, enemy, title } = state.roundSettlement;
+  return `
+    <div class="round-settlement">
+      <div class="round-settlement-card">
+        <div class="round-settlement-title">${title}</div>
+        <div class="round-settlement-subtitle">本回合双方酒醉度结算如下，点继续再开始下一回合抽卡。</div>
+        <div class="round-settlement-grid">
+          <div class="settlement-side player">
+            <div class="settlement-name">${player.name}</div>
+            <div class="settlement-gain pop">+${player.gain}</div>
+            <div class="settlement-meta">本回合喝了 ${player.cups} 杯</div>
+            <div class="settlement-meta">当前酒醉度 ${player.total} / ${MAX_DRUNK}</div>
+            ${player.undone ? `<div class="settlement-note">吐回上回合：-${player.undone}</div>` : ""}
+          </div>
+          <div class="settlement-side enemy">
+            <div class="settlement-name">${enemy.name}</div>
+            <div class="settlement-gain pop">+${enemy.gain}</div>
+            <div class="settlement-meta">本回合喝了 ${enemy.cups} 杯</div>
+            <div class="settlement-meta">当前酒醉度 ${enemy.total} / ${MAX_DRUNK}</div>
+            ${enemy.undone ? `<div class="settlement-note">吐回上回合：-${enemy.undone}</div>` : ""}
+          </div>
+        </div>
+        <button class="settlement-continue-btn" data-action="continue-round">继续</button>
+      </div>
+    </div>
+  `;
+}
+
 function renderBattleScreen() {
   const state = uiState.gameState;
   const isResult = state.stage === "result";
@@ -1202,6 +1275,7 @@ function renderBattleScreen() {
           </div>
           ${fighterPanelMarkup(state.enemy)}
         </div>
+        ${!isResult ? renderRoundSettlementMarkup(state) : ""}
         ${!isResult ? renderCardPackMarkup(state) : ""}
       </div>
       ${!isResult ? `
@@ -1302,6 +1376,7 @@ document.addEventListener("click", (event) => {
   if (action === "replace-card") replaceHandCard(Number(target.dataset.index));
   if (action === "toggle-card") toggleQueuedCard(Number(target.dataset.index));
   if (action === "toggle-special-card") toggleQueuedSpecial();
+  if (action === "continue-round") continueNextRound();
   if (action === "play-empty") resolveRound({ cardIndices: [], useSpecial: false });
   if (action === "play-selected") {
     const state = uiState.gameState;
